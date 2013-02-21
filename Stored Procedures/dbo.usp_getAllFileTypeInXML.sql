@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllFileTypeInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML XML = (select FileTypeID AS ID, FileType AS Name from dbo.tb_file_type FOR XML PATH('Type'), ROOT('ChurchFileType'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;
+	
+
+SET NOCOUNT OFF;
+GO

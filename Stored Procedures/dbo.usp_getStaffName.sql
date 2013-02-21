@@ -1,0 +1,13 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getStaffName]
+(@UserID VARCHAR(50))
+AS
+SET NOCOUNT ON;
+
+SELECT dbo.udf_getStafforMemberName(NRIC) AS Name FROM dbo.tb_Users WHERE UserID = @UserID
+
+SET NOCOUNT OFF;
+GO

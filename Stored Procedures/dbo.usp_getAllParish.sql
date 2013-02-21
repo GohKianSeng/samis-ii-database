@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllParish]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,ParishID) AS ParishID, ParishName FROM tb_parish
+	
+
+SET NOCOUNT OFF;
+GO

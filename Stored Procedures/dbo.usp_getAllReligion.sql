@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllReligion]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT, ReligionID) AS ReligionID, ReligionName FROM dbo.tb_religion
+	
+
+SET NOCOUNT OFF;
+GO

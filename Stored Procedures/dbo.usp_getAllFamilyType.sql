@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllFamilyType]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT, FamilyTypeID) AS FamilyTypeID, FamilyType FROM tb_familytype
+	
+
+SET NOCOUNT OFF;
+GO

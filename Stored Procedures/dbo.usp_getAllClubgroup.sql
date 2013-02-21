@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllClubgroup]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,ClubGroupID) AS ClubGroupID, ClubGroupName FROM dbo.tb_clubgroup
+	
+
+SET NOCOUNT OFF;
+GO

@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllFileType]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT, FileTypeID) AS FileTypeID, FileType FROM tb_file_type
+	
+
+SET NOCOUNT OFF;
+GO

@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllConfigInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML XML = (select ConfigID, ConfigName, value from dbo.tb_App_Config FOR XML PATH('Config'), ROOT('ChurchConfig'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;	
+
+SET NOCOUNT OFF;
+GO

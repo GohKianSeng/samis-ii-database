@@ -1,0 +1,18 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_removeCourse]
+(@CourseID INT)
+AS
+SET NOCOUNT ON;
+
+IF EXISTS (SELECT * FROM dbo.tb_course WHERE courseID = @CourseID)
+BEGIN
+	UPDATE dbo.tb_course SET Deleted = 1 WHERE courseID = @CourseID
+END
+
+SELECT @@ROWCOUNT AS Result
+
+SET NOCOUNT OFF;
+GO

@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllDialect]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,DialectID) AS DialectID, DialectName FROM dbo.tb_dialect
+	
+
+SET NOCOUNT OFF;
+GO

@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllSchoolInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML XML = (select SchoolID AS ID, SchoolName AS Name from dbo.tb_school ORDER BY SchoolName ASC FOR XML PATH('Type'), ROOT('School'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;
+	
+
+SET NOCOUNT OFF;
+GO

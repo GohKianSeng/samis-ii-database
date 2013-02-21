@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllChurchArea]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,AreaID) AS AreaID, AreaName FROM tb_ChurchArea
+	
+
+SET NOCOUNT OFF;
+GO

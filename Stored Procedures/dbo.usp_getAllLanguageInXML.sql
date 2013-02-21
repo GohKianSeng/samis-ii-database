@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllLanguageInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML XML = (select LanguageID, LanguageName from dbo.tb_language FOR XML PATH('Language'), ROOT('ChurchLanguage'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;
+	
+
+SET NOCOUNT OFF;
+GO

@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllStyle]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,StyleID) AS StyleID, StyleName FROM tb_style
+	
+
+SET NOCOUNT OFF;
+GO

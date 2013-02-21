@@ -1,0 +1,17 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getUsersInRole]
+(@RoleID AS INT)
+
+AS
+SET NOCOUNT ON;
+
+SELECT (SELECT B.Name FROM dbo.tb_Roles_Users AS A
+INNER JOIN dbo.tb_Users AS B ON A.UserID = B.UserID
+WHERE A.RoleID = @RoleID
+FOR XML PATH(''), ELEMENTS, ROOT('All')) AS Display
+
+SET NOCOUNT OFF;
+GO

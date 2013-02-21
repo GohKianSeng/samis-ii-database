@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllStyleInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML XML = (select StyleID, StyleName from dbo.tb_style FOR XML PATH('Style'), ROOT('ChurchStyle'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;
+	
+
+SET NOCOUNT OFF;
+GO

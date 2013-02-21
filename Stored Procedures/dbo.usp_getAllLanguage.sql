@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllLanguage]
+
+AS
+SET NOCOUNT ON;
+
+	Select CONVERT(INT,LanguageID) AS LanguageID, LanguageName FROM tb_language ORDER BY LanguageName
+	
+
+SET NOCOUNT OFF;
+GO

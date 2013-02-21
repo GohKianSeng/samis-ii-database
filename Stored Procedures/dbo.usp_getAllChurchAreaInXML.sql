@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[usp_getAllChurchAreaInXML]
+
+AS
+SET NOCOUNT ON;
+
+	DECLARE @XML AS XML = (select AreaID AS ID, AreaName AS Name from dbo.tb_churchArea FOR XML PATH('Type'), ROOT('ChurchArea'));
+	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;
+	
+
+SET NOCOUNT OFF;
+GO
