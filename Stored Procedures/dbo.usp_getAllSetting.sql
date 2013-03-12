@@ -1,0 +1,16 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+CREATE PROCEDURE [dbo].[usp_getAllSetting]
+
+AS
+SET NOCOUNT ON;
+
+	Select ExternalDBID, ExternalSiteName, ExternalDBIP FROM dbo.tb_ExternalDB ORDER BY ExternalDBID ASC
+	
+
+SET NOCOUNT OFF;
+
+GO

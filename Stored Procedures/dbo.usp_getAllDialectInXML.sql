@@ -1,15 +1,18 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROCEDURE [dbo].[usp_getAllDialectInXML]
 
 AS
 SET NOCOUNT ON;
 
-	DECLARE @XML XML = (select DialectID, DialectName from dbo.tb_dialect FOR XML PATH('Dialect'), ROOT('ChurchDialect'));
+	DECLARE @XML XML = (select DialectID AS ID, DialectName AS Name from dbo.tb_dialect FOR XML PATH('Type'), ROOT('ChurchDialect'));
 	SELECT @XML AS [XML] WHERE LEN(CONVERT(VARCHAR(MAX), @XML)) > 0;	
 	
 
 SET NOCOUNT OFF;
+
 GO
