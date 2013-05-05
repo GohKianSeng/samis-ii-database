@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[usp_getVisitorInformation]
-(@NRIC VARCHAR(10))
+(@NRIC VARCHAR(20))
 AS
 SET NOCOUNT ON;
 

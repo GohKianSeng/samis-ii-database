@@ -1,8 +1,8 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE PROCEDURE [dbo].[usp_SyncAllSettings]
 (@XML XML)
 AS
@@ -50,7 +50,10 @@ SET IDENTITY_INSERT dbo.tb_course ON
 
 INSERT INTO dbo.tb_course(courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee)
 SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee
-FROM @Course WHERE courseID NOT IN (SELECT courseID FROM dbo.tb_course) 
+FROM @Course WHERE courseID NOT IN (SELECT courseID FROM dbo.tb_course)
+
+IF EXISTS(SELECT 1 FROM @Course)
+DELETE FROM dbo.tb_course WHERE courseID NOT IN (SELECT courseID FROM @Course);
 
 SET IDENTITY_INSERT dbo.tb_course OFF				
 --
@@ -70,6 +73,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT SchoolID FROM dbo.tb_school)
 
 SET IDENTITY_INSERT dbo.tb_school OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_school WHERE SchoolID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -89,6 +96,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT ReligionID FROM dbo.tb_religion)
 
 SET IDENTITY_INSERT dbo.tb_religion OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_religion WHERE ReligionID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -108,6 +119,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT RaceID FROM dbo.tb_race)
 
 SET IDENTITY_INSERT dbo.tb_race OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_race WHERE RaceID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -127,6 +142,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT ClubGroupID FROM dbo.tb_clubgroup)
 
 SET IDENTITY_INSERT dbo.tb_clubgroup OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_clubgroup WHERE ClubGroupID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 
@@ -147,6 +166,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT BusGroupClusterID FROM dbo.tb_busgroup_cluster)
 
 SET IDENTITY_INSERT dbo.tb_busgroup_cluster OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_busgroup_cluster WHERE BusGroupClusterID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 
@@ -167,6 +190,10 @@ SELECT ID, Value1, Value2 FROM @Table
 WHERE ID NOT IN (SELECT District FROM dbo.tb_postalArea)
 
 SET IDENTITY_INSERT dbo.tb_postalArea OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_postalArea WHERE District NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -186,6 +213,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT StyleID FROM dbo.tb_style)
 
 SET IDENTITY_INSERT dbo.tb_style OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_style WHERE StyleID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -205,6 +236,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT SalutationID FROM dbo.tb_Salutation)
 
 SET IDENTITY_INSERT dbo.tb_Salutation OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_Salutation WHERE SalutationID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -224,6 +259,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT ParishID FROM dbo.tb_parish)
 
 SET IDENTITY_INSERT dbo.tb_parish OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_parish WHERE ParishID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -243,6 +282,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT OccupationID FROM dbo.tb_occupation)
 
 SET IDENTITY_INSERT dbo.tb_occupation OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_occupation WHERE OccupationID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -262,6 +305,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT MaritalStatusID FROM dbo.tb_maritalstatus)
 
 SET IDENTITY_INSERT dbo.tb_maritalstatus OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_maritalstatus WHERE MaritalStatusID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -281,6 +328,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT LanguageID FROM dbo.tb_language)
 
 SET IDENTITY_INSERT dbo.tb_language OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_language WHERE LanguageID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -300,6 +351,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT FamilyTypeID FROM dbo.tb_familytype)
 
 SET IDENTITY_INSERT dbo.tb_familytype OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_familytype WHERE FamilyTypeID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -319,6 +374,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT FileTypeID FROM dbo.tb_file_type)
 
 SET IDENTITY_INSERT dbo.tb_file_type OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_file_type WHERE FileTypeID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -338,6 +397,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT AreaID FROM dbo.tb_churchArea)
 
 SET IDENTITY_INSERT dbo.tb_churchArea OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_churchArea WHERE AreaID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -357,6 +420,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT CongregationID FROM dbo.tb_congregation)
 
 SET IDENTITY_INSERT dbo.tb_congregation OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_congregation WHERE CongregationID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -376,6 +443,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT CountryID FROM dbo.tb_country)
 
 SET IDENTITY_INSERT dbo.tb_country OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_country WHERE CountryID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -395,6 +466,10 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT DialectID FROM dbo.tb_dialect)
 
 SET IDENTITY_INSERT dbo.tb_dialect OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_dialect WHERE DialectID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 --
@@ -414,10 +489,14 @@ SELECT ID, Value1 FROM @Table
 WHERE ID NOT IN (SELECT EducationID FROM dbo.tb_education)
 
 SET IDENTITY_INSERT dbo.tb_education OFF
+
+IF EXISTS(SELECT 1 FROM @Table)
+DELETE FROM dbo.tb_education WHERE EducationID NOT IN (SELECT ID FROM @Table);
+
 DELETE FROM @Table
 
 SELECT 'Updated' AS Result;
 
 SET NOCOUNT OFF;
-
+GO
 GO

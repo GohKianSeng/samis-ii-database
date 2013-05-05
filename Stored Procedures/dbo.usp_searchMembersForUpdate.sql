@@ -26,7 +26,7 @@ BEGIN
 	LEFT OUTER JOIN dbo.tb_country AS B ON A.Nationality = B.CountryID
 	LEFT OUTER JOIN dbo.tb_Salutation AS C ON A.Salutation = C.SalutationID
 	LEFT OUTER JOIN dbo.tb_membersOtherInfo AS D ON A.NRIC = D.NRIC
-	WHERE (A.NRIC LIKE '%'+@NRIC+'%' OR EnglishName LIKE '%'+@Name+'%')
+	WHERE (A.NRIC LIKE '%'+@NRIC+'%' OR dbo.udf_SearchName(@Name, EnglishName) = 1)
 	AND CurrentParish = @CurrentParish AND D.Congregation IN (SELECT congregationID FROM @congregationTable)
 	ORDER BY Name, NRIC
 END
@@ -48,7 +48,7 @@ BEGIN
 	LEFT OUTER JOIN dbo.tb_country AS B ON A.Nationality = B.CountryID
 	LEFT OUTER JOIN dbo.tb_Salutation AS C ON A.Salutation = C.SalutationID
 	LEFT OUTER JOIN dbo.tb_membersOtherInfo AS D ON A.NRIC = D.NRIC
-	WHERE EnglishName LIKE '%'+@Name+'%'
+	WHERE dbo.udf_SearchName(@Name, EnglishName) = 1
 	AND CurrentParish = @CurrentParish AND D.Congregation IN (SELECT congregationID FROM @congregationTable)
 	ORDER BY Name
 END

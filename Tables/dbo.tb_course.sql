@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tb_course]
 (
 [courseID] [int] NOT NULL IDENTITY(20, 1),
 [CourseName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[CourseStartDate] [varchar] (2000) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[CourseStartDate] [varchar] (8000) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CourseEndDate] [date] NULL,
 [CourseStartTime] [time] NOT NULL,
 [CourseEndTime] [time] NOT NULL,

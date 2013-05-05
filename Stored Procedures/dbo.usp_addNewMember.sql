@@ -4,9 +4,12 @@ SET ANSI_NULLS ON
 GO
 
 CREATE PROCEDURE [dbo].[usp_addNewMember]
-(@newXML AS XML)
+(@newXML AS XML,
+ @Result VARCHAR(10) OUTPUT)
 AS
 SET NOCOUNT ON;
+
+SET @Result = '0';
 
 DECLARE @UserID VARCHAR(50),
 @candidate_salutation VARCHAR(4),
@@ -39,7 +42,7 @@ DECLARE @UserID VARCHAR(50),
 @candidate_marriage_date VARCHAR(15),
 @candidate_congregation VARCHAR(3),
 @candidate_sponsor1 VARCHAR(10),
-@candidate_sponsor2 VARCHAR(10),
+@candidate_sponsor2 VARCHAR(100),
 @candidate_sponsor2contact VARCHAR(100),
 @family XML,
 @child XML,
@@ -113,7 +116,7 @@ DECLARE @idoc int;
 	Tithing VARCHAR(1) './InterestedTithing',
 	Ministry XML './Ministry',
 	Sponsor1 VARCHAR(20) './Sponsor1',
-	Sponsor2 VARCHAR(20) './Sponsor2',
+	Sponsor2 VARCHAR(100) './Sponsor2',
 	Sponsor2Contact VARCHAR(100) './Sponsor2Contact',
 	BaptismByOthers VARCHAR(100) './BaptismByOthers',
 	BaptismChurchOthers VARCHAR(100) './BaptismChurchOthers',
@@ -189,7 +192,7 @@ BEGIN
 			@confirm_church_others,
 			@previous_church_others;
 			
-			DECLARE @rowcount INT = @@ROWCOUNT;
+			SET @Result = @@ROWCOUNT;
 			
 			INSERT INTO dbo.tb_membersOtherInfo_temp (NRIC, Congregation, Sponsor1, Sponsor2, Sponsor2Contact, MinistryInterested, CellgroupInterested, ServeCongregationInterested, TithingInterested)
 			SELECT @candidate_nric, @candidate_congregation, @candidate_sponsor1, @candidate_sponsor2, @candidate_sponsor2contact, @candidate_interested_ministry, @candidate_join_cellgroup, @candidate_serve_congregation, @candidate_tithing
@@ -214,13 +217,13 @@ BEGIN
 			LEFT OUTER JOIN dbo.tb_parish AS L ON A.PreviousChurch = L.ParishID
 			WHERE A.NRIC = @candidate_nric
 			FOR XML PATH, ELEMENTS)
-			SELECT ISNULL(@rowcount, 0) AS Result
-			EXEC dbo.usp_insertlogging 'I', @UserID, 'Membership', 'New', 1, 'NRIC', @candidate_nric, @newMemberXML;
 			
+			DECLARE @LogID TABLE(ID INT);
+			INSERT INTO @LogID(ID)
+			EXEC dbo.usp_insertlogging 'I', @UserID, 'Membership', 'New', 1, 'NRIC', @candidate_nric, @newMemberXML;			
 	END
 
 END		
-SELECT ISNULL(@rowcount, 0) AS Result
 
 SET NOCOUNT OFF;
 

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -45,6 +46,52 @@ BEGIN
 			
 			  SELECT 'Welcome ' + @name + ', your attendance registered, ' + @coursename AS Result;
 		END
+	END
+	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
+	BEGIN
+		INSERT INTO dbo.tb_course_participant(NRIC, courseID)
+		SELECT @nric, @courseid;
+		
+		INSERT INTO dbo.tb_course_Attendance(NRIC, CourseID, Date)
+		SELECT @nric, @courseid, GETDATE();
+		
+		SELECT @name = B.EnglishName, @coursename = E.CourseName FROM dbo.tb_course_participant AS A
+	    LEFT OUTER JOIN dbo.tb_members AS B ON A.NRIC = B.NRIC
+	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
+	    WHERE A.courseID = @courseid AND A.NRIC = @nric
+	
+	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+		
+	END
+	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @nric)
+	BEGIN
+		INSERT INTO dbo.tb_course_participant(NRIC, courseID)
+		SELECT @nric, @courseid;
+		
+		INSERT INTO dbo.tb_course_Attendance(NRIC, CourseID, Date)
+		SELECT @nric, @courseid, GETDATE();
+		
+		SELECT @name = B.EnglishName, @coursename = E.CourseName FROM dbo.tb_course_participant AS A
+	    LEFT OUTER JOIN dbo.tb_members_temp AS B ON A.NRIC = B.NRIC
+	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
+	    WHERE A.courseID = @courseid AND A.NRIC = @nric
+	
+	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+	END
+	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
+	BEGIN
+		INSERT INTO dbo.tb_course_participant(NRIC, courseID)
+		SELECT @nric, @courseid;
+		
+		INSERT INTO dbo.tb_course_Attendance(NRIC, CourseID, Date)
+		SELECT @nric, @courseid, GETDATE();
+		
+		SELECT @name = B.EnglishName, @coursename = E.CourseName FROM dbo.tb_course_participant AS A
+	    LEFT OUTER JOIN dbo.tb_visitors AS B ON A.NRIC = B.NRIC
+	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
+	    WHERE A.courseID = @courseid AND A.NRIC = @nric
+	
+	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
 	END
 	ELSE
 	BEGIN
