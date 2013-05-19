@@ -57,7 +57,7 @@ DECLARE @UserID VARCHAR(50),
 	Education VARCHAR(3) './Education',
 	Occupation VARCHAR(3) './Occupation',
 	Church VARCHAR(3) './Church',
-	ChurchOthers VARCHAR(3) './ChurchOthers');	
+	ChurchOthers VARCHAR(100) './ChurchOthers');	
 
 DECLARE @rowcount INT
 SET @rowcount = 0

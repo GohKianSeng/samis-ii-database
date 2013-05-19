@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -153,7 +154,13 @@ END
 
 IF NOT EXISTS( SELECT * FROM dbo.tb_members WHERE NRIC = @candidate_nric)
 BEGIN
-
+	DECLARE @SystemMode VARCHAR(100) = (SELECT value FROM dbo.tb_App_Config WHERE ConfigName = 'SystemMode');
+	IF(@SystemMode = 'SAMIS')
+	BEGIN
+		DELETE FROM dbo.tb_membersOtherInfo_temp WHERE NRIC = @candidate_nric;
+		DELETE FROM dbo.tb_members_temp WHERE NRIC = @candidate_nric;
+	END
+	
 	IF NOT EXISTS( SELECT * FROM dbo.tb_members_temp WHERE NRIC = @candidate_nric)
 	BEGIN
 

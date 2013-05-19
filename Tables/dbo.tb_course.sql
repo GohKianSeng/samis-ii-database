@@ -10,8 +10,12 @@ CREATE TABLE [dbo].[tb_course]
 [CourseLocation] [tinyint] NOT NULL,
 [CourseDay] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Deleted] [bit] NOT NULL CONSTRAINT [DF_tb_course_Deleted] DEFAULT ((0)),
-[Fee] [decimal] (5, 2) NOT NULL CONSTRAINT [DF_tb_course_Fee] DEFAULT ((0.00))
+[Fee] [decimal] (5, 2) NOT NULL CONSTRAINT [DF_tb_course_Fee] DEFAULT ((0.00)),
+[LastRegistrationDate] [date] NOT NULL,
+[AdditionalQuestion] [int] NOT NULL CONSTRAINT [DF_tb_course_AdditionalQuestion] DEFAULT ((1))
 ) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[tb_course] ADD CONSTRAINT [PK_tb_course] PRIMARY KEY CLUSTERED  ([courseID]) ON [PRIMARY]
+ALTER TABLE [dbo].[tb_course] ADD 
+CONSTRAINT [PK_tb_course] PRIMARY KEY CLUSTERED  ([courseID]) ON [PRIMARY]
+ALTER TABLE [dbo].[tb_course] ADD
+CONSTRAINT [FK_tb_course_tb_course_agreement] FOREIGN KEY ([AdditionalQuestion]) REFERENCES [dbo].[tb_course_agreement] ([AgreementID])
 GO

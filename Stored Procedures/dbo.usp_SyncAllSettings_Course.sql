@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,13 +17,15 @@ DECLARE @Course TABLE (
 	CourseInCharge [varchar](20) NOT NULL,
 	CourseLocation [tinyint] NOT NULL,
 	Deleted [bit] NOT NULL,
-	Fee [decimal](5, 2) NOT NULL)
+	Fee [decimal](5, 2) NOT NULL,
+	AdditionalQuestion INT NOT NULL,
+	LastRegistrationDate DATE NOT NULL)
 
 DECLARE @idoc int;
 EXEC sp_xml_preparedocument @idoc OUTPUT, @XML;
 
-INSERT INTO @Course(courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee)
-SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee
+INSERT INTO @Course(courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee, AdditionalQuestion, LastRegistrationDate)
+SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee, AdditionalQuestion, CONVERT(DATETIME, LastRegistrationDate, 103)
 	FROM OPENXML(@idoc, '/All/AllCourse/*')
 	WITH (
 		courseID int'./courseID',
@@ -33,7 +36,9 @@ SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, Co
 		CourseInCharge VARCHAR(20)'./CourseInCharge',
 		CourseLocation tinyint'./CourseLocation',
 		Deleted BIT'./Deleted',
-		Fee DECIMAL(5, 2)'./Fee')
+		Fee DECIMAL(5, 2)'./Fee',
+		AdditionalQuestion INT './AdditionalQuestion',
+		LastRegistrationDate VARCHAR(10) './LastRegistrationDate')
 
 UPDATE dbo.tb_course SET dbo.tb_course.CourseName = A.CourseName
 						 ,dbo.tb_course.CourseStartDate = A.CourseStartDate
@@ -43,12 +48,14 @@ UPDATE dbo.tb_course SET dbo.tb_course.CourseName = A.CourseName
 						 ,dbo.tb_course.CourseLocation = A.CourseLocation
 						 ,dbo.tb_course.Deleted = A.Deleted
 						 ,dbo.tb_course.Fee = A.Fee
+						 ,dbo.tb_course.AdditionalQuestion = A.AdditionalQuestion
+						 ,dbo.tb_course.LastRegistrationDate = A.LastRegistrationDate
 FROM @Course AS A WHERE dbo.tb_course.courseID = A.courseID		
 
 SET IDENTITY_INSERT dbo.tb_course ON
 
-INSERT INTO dbo.tb_course(courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee)
-SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee
+INSERT INTO dbo.tb_course(courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee, AdditionalQuestion, LastRegistrationDate)
+SELECT courseID, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation, Deleted, Fee, AdditionalQuestion, LastRegistrationDate
 FROM @Course WHERE courseID NOT IN (SELECT courseID FROM dbo.tb_course)
 
 IF EXISTS(SELECT 1 FROM @Course)
@@ -59,4 +66,5 @@ SET IDENTITY_INSERT dbo.tb_course OFF
 SELECT 'Updated' AS Result;
 
 SET NOCOUNT OFF;
+GO
 GO

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,12 +10,14 @@ CREATE PROCEDURE [dbo].[usp_addNewCourse]
  @endtime VARCHAR(5),
  @incharge VARCHAR(10),
  @location INT,
- @fee DECIMAL(5, 2))
+ @fee DECIMAL(5, 2),
+ @AdditionalQuestion INT,
+ @LastRegistration DateTime)
 AS
 SET NOCOUNT ON;
 
-INSERT INTO dbo.tb_course (Fee, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation)
-SELECT @fee, @coursename, @startdate, @starttime, @endtime, @incharge, @location
+INSERT INTO dbo.tb_course (AdditionalQuestion, LastRegistrationDate, Fee, CourseName, CourseStartDate, CourseStartTime, CourseEndTime, CourseInCharge, CourseLocation)
+SELECT @AdditionalQuestion, @LastRegistration, @fee, @coursename, @startdate, @starttime, @endtime, @incharge, @location
 
 SELECT @@ROWCOUNT AS Result
 

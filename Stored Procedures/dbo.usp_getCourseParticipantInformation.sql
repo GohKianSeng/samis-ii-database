@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,7 +26,7 @@ END
 
 DECLARE @xml XML = (SELECT [Date], Attended, @AttandancePercentage AS AttendancePercentage FROM @AttendanceTable Order by [Date] ASC FOR XML PATH('ATT'), ROOT('Attendance'));
 
-SELECT @xml AS Attendance, A.NRIC, ISNULL(ISNULL(D.EnglishName,C.EnglishName), B.EnglishName) AS EnglishName, courseID, feePaid, materialReceived FROM dbo.tb_course_participant AS A
+SELECT @xml AS Attendance, AdditionalInformation, A.NRIC, ISNULL(ISNULL(D.EnglishName,C.EnglishName), B.EnglishName) AS EnglishName, courseID, feePaid, materialReceived FROM dbo.tb_course_participant AS A
   LEFT OUTER JOIN dbo.tb_members AS B ON A.NRIC = B.NRIC
   LEFT OUTER JOIN dbo.tb_members_temp AS C ON A.NRIC = C.NRIC
   LEFT OUTER JOIN dbo.tb_visitors AS D ON A.NRIC = D.NRIC

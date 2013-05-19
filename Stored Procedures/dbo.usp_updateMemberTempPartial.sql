@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -109,69 +110,82 @@ BEGIN
 
 	IF(@Orig_candidate_salutation <> @candidate_salutation AND @candidate_salutation <> '0')
 	BEGIN
-		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Salutation', (SELECT SalutationName FROM dbo.tb_Salutation WHERE SalutationID = @Orig_candidate_salutation), (SELECT SalutationName FROM dbo.tb_Salutation WHERE SalutationID = @candidate_salutation));		
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Salutation', (SELECT SalutationName FROM dbo.tb_Salutation WHERE SalutationID = @Orig_candidate_salutation), (SELECT SalutationName FROM dbo.tb_Salutation WHERE SalutationID = @candidate_salutation));
+		SET @Orig_candidate_salutation = @candidate_salutation;
 	END
 
 	IF(@Orig_candidate_english_name <> @candidate_english_name AND LEN(@candidate_english_name) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('English Name', @Orig_candidate_english_name, @candidate_english_name);
+		SET @Orig_candidate_english_name = @candidate_english_name;
 	END
 
 	IF(@Orig_candidate_unit <> @candidate_unit AND LEN(@candidate_unit) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Address Unit', @Orig_candidate_unit, @candidate_unit);
+		SET @Orig_candidate_unit = @candidate_unit;
 	END
 
 	IF(@Orig_candidate_blk_house <> @candidate_blk_house AND LEN(@candidate_blk_house) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Address BLK/House', @Orig_candidate_blk_house, @candidate_blk_house);
+		SET @Orig_candidate_blk_house = @candidate_blk_house;
 	END
 
 	IF(@Orig_candidate_street_address <> @candidate_street_address AND LEN(@candidate_street_address) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Address Street', @Orig_candidate_street_address, @candidate_street_address);
+		SET @Orig_candidate_street_address = @candidate_street_address;
 	END
 
-	IF(@Orig_candidate_postal_code <> @candidate_postal_code AND LEN(@candidate_postal_code) >0)
+	IF(@Orig_candidate_postal_code <> @candidate_postal_code AND @candidate_postal_code <> 0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Address Postal Code', @Orig_candidate_postal_code, @candidate_postal_code);
+		SET @Orig_candidate_postal_code = @candidate_postal_code;
 	END
 	
 	IF(@Orig_candidate_nationality <> @candidate_nationality AND @candidate_nationality <> '0')
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To])
 		SELECT 'Nationality', (SELECT CountryName FROM dbo.tb_country WHERE CountryID = @Orig_candidate_nationality), (SELECT CountryName FROM dbo.tb_country WHERE CountryID = @candidate_nationality);
+		SET @Orig_candidate_nationality = @candidate_nationality;
 	END
 
 	IF(@Orig_candidate_occupation <> @candidate_occupation AND @candidate_occupation <> '0')
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To])
 		SELECT 'Occupation', (SELECT OccupationName FROM dbo.tb_occupation WHERE OccupationID = @Orig_candidate_occupation), (SELECT OccupationName FROM dbo.tb_occupation WHERE OccupationID = @candidate_occupation);
+		SET @Orig_candidate_occupation = @candidate_occupation;
 	END
 
 	IF(@Orig_candidate_dob <> @candidate_dob AND @candidate_dob <> CONVERT(DATETIME, '', 103))
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Date Of Birth', @Orig_candidate_dob, @candidate_dob);
+		SET @Orig_candidate_dob = @candidate_dob;
 	END
 
 	IF(@Orig_candidate_gender <> @candidate_gender AND LEN(@candidate_gender) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Gender', @Orig_candidate_gender, @candidate_gender);
+		SET @Orig_candidate_gender = @candidate_gender;
 	END
 
 	IF(@Orig_candidate_email <> @candidate_email AND LEN(@candidate_email) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Email', @Orig_candidate_email, @candidate_email);
+		SET @Orig_candidate_email = @candidate_email;
 	END
 
 	IF(@Orig_candidate_education <> @candidate_education AND @candidate_education <> '0')
 	BEGIN
-		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Education', (SELECT EducationName FROM dbo.tb_education WHERE EducationID = @Orig_candidate_education), (SELECT EducationName FROM dbo.tb_education WHERE EducationID = @candidate_education));		
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Education', (SELECT EducationName FROM dbo.tb_education WHERE EducationID = @Orig_candidate_education), (SELECT EducationName FROM dbo.tb_education WHERE EducationID = @candidate_education));
+		SET @Orig_candidate_education = @candidate_education;
 	END
 
 	IF(@Orig_candidate_mobile_tel <> @candidate_mobile_tel AND LEN(@candidate_mobile_tel) >0)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Mobile Tel', @Orig_candidate_mobile_tel, @candidate_mobile_tel);
+		SET @Orig_candidate_mobile_tel = @candidate_mobile_tel;
 	END
 
 	DECLARE @returnTable TABLE (
@@ -187,20 +201,19 @@ BEGIN
 		
 		
 		
-		UPDATE dbo.tb_members_temp SET   Salutation = @candidate_salutation,
-							NRIC = @candidate_nric,
-							EnglishName = @candidate_english_name,
-							AddressUnit = @candidate_unit,
-							AddressHouseBlk = @candidate_blk_house,
-							Nationality = @candidate_nationality,
-							Occupation = @candidate_occupation,
-							DOB = @candidate_dob,
-							Gender = @candidate_gender,
-							AddressStreet = @candidate_street_address,
-							AddressPostalCode = @candidate_postal_code,
-							Email = @candidate_email,
-							Education = @candidate_education,
-							MobileTel = @candidate_mobile_tel
+		UPDATE dbo.tb_members_temp SET   Salutation = @Orig_candidate_salutation,
+							EnglishName = @Orig_candidate_english_name,
+							AddressUnit = @Orig_candidate_unit,
+							AddressHouseBlk = @Orig_candidate_blk_house,
+							Nationality = @Orig_candidate_nationality,
+							Occupation = @Orig_candidate_occupation,
+							DOB = @Orig_candidate_dob,
+							Gender = @Orig_candidate_gender,
+							AddressStreet = @Orig_candidate_street_address,
+							AddressPostalCode = @Orig_candidate_postal_code,
+							Email = @Orig_candidate_email,
+							Education = @Orig_candidate_education,
+							MobileTel = @Orig_candidate_mobile_tel
 							
 		WHERE NRIC = @candidate_nric
 			

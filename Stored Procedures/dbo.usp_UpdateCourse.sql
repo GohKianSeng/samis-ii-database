@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,12 +10,15 @@ CREATE PROCEDURE [dbo].[usp_UpdateCourse]
  @starttime VARCHAR(5),
  @endtime VARCHAR(5),
  @incharge VARCHAR(10),
- @location INT)
+ @location INT,
+ @AdditionalInformation INT,
+ @LastRegistrationDate DATETIME)
 AS
 SET NOCOUNT ON;
 
 UPDATE dbo.tb_course SET CourseName = @coursename, CourseStartDate = @startdate,
-	   CourseStartTime = @starttime, CourseEndTime = @endtime, CourseInCharge = @incharge, CourseLocation = @location
+	   CourseStartTime = @starttime, CourseEndTime = @endtime, CourseInCharge = @incharge, CourseLocation = @location,
+       AdditionalQuestion = @AdditionalInformation, LastRegistrationDate = @LastRegistrationDate
        WHERE courseID = @courseid;
 SELECT @@ROWCOUNT AS Result
 

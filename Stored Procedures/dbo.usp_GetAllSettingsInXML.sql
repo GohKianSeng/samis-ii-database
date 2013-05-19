@@ -1,13 +1,15 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE PROCEDURE [dbo].[usp_GetAllSettingsInXML]
 AS
 SET NOCOUNT ON;
 
 DECLARE @XML XML = (SELECT
+	CONVERT(XML, (SELECT AgreementID, AgreementType, AgreementHTML FROM dbo.tb_course_agreement FOR XML PATH('ChurchAgreement'), ELEMENTS)) AS AllChurchAgreement,
+	CONVERT(XML, (SELECT EmailID, EmailType, EmailContent FROM dbo.tb_emailContent FOR XML PATH('ChurchEmail'), ELEMENTS)) AS AllChurchEmail,
 	CONVERT(XML, (SELECT AreaID, AreaName FROM dbo.tb_churchArea FOR XML PATH('ChurchArea'), ELEMENTS)) AS AllChurchArea,
 	CONVERT(XML, (SELECT CongregationID, CongregationName FROM dbo.tb_congregation FOR XML PATH('Congregation'), ELEMENTS)) AS AllCongregation,
 	CONVERT(XML, (SELECT CountryID, CountryName FROM dbo.tb_country FOR XML PATH('Country'), ELEMENTS)) AS AllCountry,
@@ -27,11 +29,10 @@ DECLARE @XML XML = (SELECT
 	CONVERT(XML, (SELECT RaceID, RaceName FROM dbo.tb_race FOR XML PATH('Race'), ELEMENTS)) AS AllRace,
 	CONVERT(XML, (SELECT ReligionID, ReligionName FROM dbo.tb_religion FOR XML PATH('Religion'), ELEMENTS)) AS AllReligion,
 	CONVERT(XML, (SELECT SchoolID, SchoolName FROM dbo.tb_school FOR XML PATH('School'), ELEMENTS)) AS AllSchool,
-	CONVERT(XML, (SELECT courseID ,CourseName ,CourseStartDate ,CourseStartTime ,CourseEndTime ,'S00000000' AS CourseInCharge ,CourseLocation ,CourseDay ,Deleted ,Fee FROM dbo.tb_course FOR XML PATH('Course'), ELEMENTS)) AS AllCourse
+	CONVERT(XML, (SELECT courseID ,CourseName ,CourseStartDate ,CourseStartTime ,CourseEndTime ,'S00000000' AS CourseInCharge ,CourseLocation ,CourseDay ,Deleted ,Fee, AdditionalQuestion, CONVERT(VARCHAR(10), LastRegistrationDate, 103) AS LastRegistrationDate FROM dbo.tb_course FOR XML PATH('Course'), ELEMENTS)) AS AllCourse
 FOR XML PATH(''), ELEMENTS, ROOT('All'));
 
 SELECT @XML as [XML];
 
 SET NOCOUNT OFF;
-
 GO

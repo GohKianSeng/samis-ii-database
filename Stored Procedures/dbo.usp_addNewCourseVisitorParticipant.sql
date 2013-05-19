@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,8 @@ CREATE PROCEDURE [dbo].[usp_addNewCourseVisitorParticipant]
 @FinalResult VARCHAR(10) OUTPUT,
 @FinalSalutation VARCHAR(10) OUTPUT,
 @FinalEnglishName VARCHAR(50) OUTPUT,
-@FinalCourseName VARCHAR(100) OUTPUT)
+@FinalCourseName VARCHAR(100) OUTPUT,
+@AdditionalInformation XML)
 AS
 SET NOCOUNT ON;
 
@@ -63,26 +65,32 @@ DECLARE @nric VARCHAR(20),
 
 IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
 OR EXISTS (SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
+OR EXISTS (SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @nric)
 BEGIN
-	
 	DECLARE @Result VARCHAR(100) = 'NotFound';
-	EXEC dbo.usp_updateVistor @Visitor, @Result OUTPUT;
+	IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
+	BEGIN
+		EXEC dbo.usp_updateVistor @Visitor, @Result OUTPUT;
+	END
+	ELSE IF EXISTS (SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
+	BEGIN
+		EXEC dbo.usp_updateMemberPartial @Visitor, @Result OUTPUT;
+	END
+	ELSE IF EXISTS (SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @nric)
+	BEGIN
+		EXEC dbo.usp_updateMemberTempPartial @Visitor, @Result OUTPUT;
+	END
 	
 	IF EXISTS(SELECT 1 FROM dbo.tb_course_participant WHERE NRIC = @nric AND courseID = @course)
 	BEGIN
-		SELECT @FinalResult = 'EXISTS', @FinalSalutation = '', @FinalEnglishName = @english_name, @FinalCourseName = CourseName FROM dbo.tb_course WHERE courseID = @course;
+		UPDATE dbo.tb_course_participant SET AdditionalInformation = @AdditionalInformation WHERE NRIC = @nric AND courseID = @course;
+		
+		SELECT @FinalResult = 'EXISTS', @FinalSalutation = '', @FinalEnglishName = @english_name, @FinalCourseName = CourseName FROM dbo.tb_course WHERE courseID = @course;		
 		return;
 	END
 	ELSE
 	BEGIN
-		INSERT INTO dbo.tb_course_participant(NRIC, courseID)
-		SELECT @nric, @course;
-		
-		SELECT @FinalResult = 'OK', @FinalSalutation = ISNULL(D.SalutationName, ''), @FinalEnglishName = B.EnglishName, @FinalCourseName = C.CourseName FROM dbo.tb_course_participant AS A
-		INNER JOIN dbo.tb_visitors AS B ON B.NRIC = A.NRIC
-		INNER JOIN dbo.tb_course AS C ON A.courseID = C.courseID
-		LEFT OUTER JOIN dbo.tb_Salutation AS D ON D.SalutationID = B.Salutation
-		WHERE A.NRIC = @nric AND A.courseID = @course;
+		EXEC dbo.usp_addNewCourseMemberParticipant @nric, @course, @AdditionalInformation
 		return;
 	END
 END
@@ -101,8 +109,8 @@ BEGIN
 	INSERT INTO dbo.tb_visitors(Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
 	SELECT @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
 	
-	INSERT INTO dbo.tb_course_participant(NRIC, courseID)
-	SELECT @nric, @course;
+	INSERT INTO dbo.tb_course_participant(NRIC, courseID, AdditionalInformation)
+	SELECT @nric, @course, ISNULL(@AdditionalInformation, '<div />');
 	
 	DECLARE @newVisitorXML XML = (
 	SELECT  C.SalutationName, A.EnglishName, A.AddressUnit,

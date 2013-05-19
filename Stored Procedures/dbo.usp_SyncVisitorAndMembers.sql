@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,6 +19,10 @@ BEGIN TRY
 	DECLARE @Index INT = 1;
 	DECLARE @NRICDoneTable TABLE(NRIC VARCHAR(20), [Type] VARCHAR(7), [XML] XML, Successful BIT, PhotoFile VARCHAR(1000));
 	
+	DECLARE @CourseID INT;
+	DECLARE @RegistrationDate DATE;
+	DECLARE @AdditionalInformation XML;
+	
 	INSERT INTO @NewMemberTable (NewMemberXML)
 	SELECT NewMember FROM OPENXML(@idoc, '/SyncData/AllMembers/*') WITH (NewMember XML '.');
 
@@ -28,21 +33,54 @@ BEGIN TRY
 	WHILE(@Index <= @Count)
 	BEGIN
 		DECLARE @NewXML XML = (SELECT NewMemberXML FROM @NewMemberTable WHERE ID = @Index);
-		DECLARE @NRIC VARCHAR(20) = (SELECT T2.Loc.value('./NRIC[1]','VARCHAR(20)') FROM @NewXML.nodes('/New') as T2(Loc));
-		IF EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @NRIC)
-		OR EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @NRIC)
+		DECLARE @NRIC VARCHAR(20);
+
+		DECLARE @feePaid BIT;
+		DECLARE @materialReceived BIT;		
+		
+		DECLARE @ydoc int;
+		EXEC sp_xml_preparedocument @ydoc OUTPUT, @NewXML;
+		
+		SELECT @CourseID = CourseID, @feePaid = feePaid, @NRIC = NRIC, @materialReceived = materialReceived,
+		@RegistrationDate = CONVERT(DATETIME, RegistrationDate, 103), @AdditionalInformation = AdditionalInformation
+		FROM OPENXML(@ydoc, '/New') WITH 
+		(NRIC VARCHAR(20) './NRIC',
+		 CourseID INT './CourseID',
+		 feePaid BIT './feePaid',
+		 materialReceived BIT './materialReceived',
+		 RegistrationDate VARCHAR(10) './RegistrationDate',
+		 AdditionalInformation XML './AdditionalInformation');
+		
+		IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @NRIC)
+		OR EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @NRIC)		
 		BEGIN
+			IF(@CourseID <> -1)
+			BEGIN
+				INSERT INTO dbo.tb_course_participant(NRIC, courseID, RegistrationDate, AdditionalInformation)
+				SELECT @NRIC, @CourseID, @RegistrationDate, @AdditionalInformation
+			END
+			
 			INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
-			SELECT @NRIC, 'New', @NewXML, 0;
+			SELECT @NRIC, 'New', @NewXML, 1;
 		END
 		ELSE
 		BEGIN
+			DELETE FROM dbo.tb_visitors WHERE NRIC = @NRIC;
+			DELETE FROM dbo.tb_membersOtherInfo_temp WHERE NRIC = @NRIC;
+			DELETE FROM dbo.tb_members_temp WHERE NRIC = @NRIC;
+			
 			DECLARE @Res VARCHAR(10) = '0';
 			EXEC dbo.usp_addNewMember @NewXML, @Res OUTPUT
 			IF(@Res = '1')
 			BEGIN
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
-				SELECT @NRIC, 'New', @NewXML, 1;		
+				SELECT @NRIC, 'New', @NewXML, 1;
+				
+				IF(@CourseID <> -1)
+				BEGIN
+					INSERT INTO dbo.tb_course_participant(NRIC, courseID, RegistrationDate, AdditionalInformation)
+					SELECT @NRIC, @CourseID, @RegistrationDate, @AdditionalInformation
+				END		
 			END
 			ELSE
 			BEGIN
@@ -62,9 +100,16 @@ BEGIN TRY
 	WHILE(@Index <= @Count)
 	BEGIN
 		DECLARE @VisitorXML XML = (SELECT NewCEXML FROM @NewCETable WHERE ID = @Index);
-		DECLARE @VisitorNRIC VARCHAR(20) = (SELECT T2.Loc.value('./NRIC[1]','VARCHAR(20)') FROM @VisitorXML.nodes('/Update') as T2(Loc));
-		DECLARE @CourseID INT = (SELECT T2.Loc.value('./CourseID[1]','INT') FROM @VisitorXML.nodes('/Update') as T2(Loc));
-		DECLARE @RegistrationDate DATE = CONVERT(DATETIME, (SELECT T2.Loc.value('./RegistrationDate[1]','VARCHAR(10)') FROM @VisitorXML.nodes('/Update') as T2(Loc)),103);
+		DECLARE @VisitorNRIC VARCHAR(20);		
+		
+		DECLARE @xdoc int;
+		EXEC sp_xml_preparedocument @xdoc OUTPUT, @VisitorXML;
+		
+		SELECT @AdditionalInformation = AdditionalInformation, @RegistrationDate = CONVERT(DATETIME, RegistrationDate, 103), @VisitorNRIC = NRIC, @CourseID = CourseID FROM OPENXML(@xdoc, '/Update') WITH 
+		(NRIC VARCHAR(20) './NRIC',
+		 CourseID INT './CourseID',
+		 RegistrationDate VARCHAR(10) './RegistrationDate',
+		 AdditionalInformation XML './AdditionalInformation');
 		
 		IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @VisitorNRIC)
 		BEGIN
@@ -74,8 +119,8 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS(SELECT 1 FROM dbo.tb_course_participant WHERE NRIC = @VisitorNRIC AND courseID = @CourseID)
 				BEGIN
-					INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate)
-					SELECT @CourseID, @VisitorNRIC, @RegistrationDate
+					INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate, AdditionalInformation)
+					SELECT @CourseID, @VisitorNRIC, @RegistrationDate, @AdditionalInformation
 				END
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 				SELECT @VisitorNRIC, 'Update', @VisitorXML, 1;
@@ -95,8 +140,8 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS(SELECT 1 FROM dbo.tb_course_participant WHERE NRIC = @VisitorNRIC AND courseID = @CourseID)
 				BEGIN
-					INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate)
-					SELECT @CourseID, @VisitorNRIC, @RegistrationDate
+					INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate, AdditionalInformation)
+					SELECT @CourseID, @VisitorNRIC, @RegistrationDate, @AdditionalInformation
 				END
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 				SELECT @VisitorNRIC, 'Update', @VisitorXML, 1;
@@ -122,14 +167,14 @@ BEGIN TRY
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 				SELECT @VisitorNRIC, 'Update', @VisitorXML, 0;
 				
-				INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate)
-				SELECT @CourseID, @VisitorNRIC, @RegistrationDate
+				INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate, AdditionalInformation)
+				SELECT @CourseID, @VisitorNRIC, @RegistrationDate, @AdditionalInformation
 			END			
 		END
 		ELSE
 		BEGIN
 			DECLARE @FResult VARCHAR(10), @SAR VARCHAR(10), @Name VARCHAR(50), @CourseName VARCHAR(100)
-			EXEC dbo.usp_addNewCourseVisitorParticipant @VisitorXML, @CourseID, @FResult OUTPUT, @SAR OUTPUT, @Name OUTPUT, @CourseName OUTPUT		
+			EXEC dbo.usp_addNewCourseVisitorParticipant @VisitorXML, @CourseID, @FResult OUTPUT, @SAR OUTPUT, @Name OUTPUT, @CourseName OUTPUT, @AdditionalInformation
 			
 			INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 			SELECT @VisitorNRIC, 'Update', @VisitorXML, 1;
@@ -162,4 +207,5 @@ END CATCH;
 	
 
 SET NOCOUNT OFF;
+GO
 GO
