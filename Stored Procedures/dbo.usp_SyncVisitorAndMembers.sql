@@ -201,11 +201,13 @@ BEGIN CATCH
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
 			ERROR_MESSAGE() AS ErrorMessage FOR XML RAW, ELEMENTS)
-	EXEC dbo.usp_insertlogging 'E', 'SQLERROR', '<SQLERROR />', 'usp_SyncVisitorAndMembers', '<SQLERROR />', 1, 0, @ErrorMSG;
-	ROLLBACK TRANSACTION;
+	ROLLBACK TRANSACTION;	
+	EXEC dbo.usp_insertloggingNoReturn N'E', N'SQLERROR', N'usp_SyncVisitorAndMembers', N'SQLERROR', 1, N'SQLERROR', N'SQLERROR', @ErrorMSG
+	
 END CATCH;
 	
 
 SET NOCOUNT OFF;
+GO
 GO
 GO
