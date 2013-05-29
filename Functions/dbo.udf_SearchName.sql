@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,7 +20,7 @@ SELECT ITEMS, 0 FROM dbo.udf_Split(RTRIM(LTRIM(@NameSearch)),' ')
 
 UPDATE @TABLE SET Found = 1
 WHERE SearchValue IN(
-SELECT ITEMS FROM dbo.udf_Split(@NameSearch,' ')
+SELECT ITEMS FROM dbo.udf_Split(RTRIM(LTRIM(@NameSearch)),' ')
 WHERE @Value LIKE ITEMS + ' %' OR @Value LIKE '% ' + ITEMS OR @Value LIKE '% ' +ITEMS+' %' OR @Value LIKE '% '+ITEMS+',%' OR @Value LIKE ITEMS+',%')
 IF ((SELECT COUNT(1) FROM @TABLE) = (SELECT COUNT(1) FROM @TABLE WHERE Found = 1))
 BEGIN

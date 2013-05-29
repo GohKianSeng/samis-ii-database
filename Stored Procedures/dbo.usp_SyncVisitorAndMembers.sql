@@ -3,6 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROCEDURE [dbo].[usp_SyncVisitorAndMembers]
 (@XML XML)
 AS
@@ -22,6 +23,8 @@ BEGIN TRY
 	DECLARE @CourseID INT;
 	DECLARE @RegistrationDate DATE;
 	DECLARE @AdditionalInformation XML;
+	
+	DECLARE @ResID INT;
 	
 	INSERT INTO @NewMemberTable (NewMemberXML)
 	SELECT NewMember FROM OPENXML(@idoc, '/SyncData/AllMembers/*') WITH (NewMember XML '.');
@@ -70,7 +73,7 @@ BEGIN TRY
 			DELETE FROM dbo.tb_members_temp WHERE NRIC = @NRIC;
 			
 			DECLARE @Res VARCHAR(10) = '0';
-			EXEC dbo.usp_addNewMember @NewXML, @Res OUTPUT
+			EXEC @ResID = dbo.usp_addNewMember @NewXML, @Res OUTPUT
 			IF(@Res = '1')
 			BEGIN
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
@@ -114,7 +117,7 @@ BEGIN TRY
 		IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @VisitorNRIC)
 		BEGIN
 			DECLARE @Temp1 VARCHAR(100) = 'NotFound';
-			EXEC dbo.usp_updateMemberPartial @VisitorXML, @Temp1 OUTPUT;
+			EXEC @ResID = dbo.usp_updateMemberPartial @VisitorXML, @Temp1 OUTPUT;
 			IF(@Temp1 <> 'NotFound')
 			BEGIN
 				IF NOT EXISTS(SELECT 1 FROM dbo.tb_course_participant WHERE NRIC = @VisitorNRIC AND courseID = @CourseID)
@@ -134,7 +137,7 @@ BEGIN TRY
 		ELSE IF EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @VisitorNRIC)
 		BEGIN
 			DECLARE @Temp2 VARCHAR(100) = 'NotFound';
-			EXEC dbo.usp_updateMemberTempPartial @VisitorXML, @Temp2 OUTPUT;
+			EXEC @ResID = dbo.usp_updateMemberTempPartial @VisitorXML, @Temp2 OUTPUT;
 			
 			IF(@Temp2 <> 'NotFound')
 			BEGIN
@@ -155,7 +158,7 @@ BEGIN TRY
 		ELSE IF EXISTS(SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @VisitorNRIC)
 		BEGIN
 			DECLARE @Result VARCHAR(100) = 'NotFound';
-			EXEC dbo.usp_updateVistor @VisitorXML, @Result OUTPUT;
+			EXEC @ResID = dbo.usp_updateVistor @VisitorXML, @Result OUTPUT;
 			
 			IF(@Result <> 'NotFound')
 			BEGIN
@@ -174,7 +177,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			DECLARE @FResult VARCHAR(10), @SAR VARCHAR(10), @Name VARCHAR(50), @CourseName VARCHAR(100)
-			EXEC dbo.usp_addNewCourseVisitorParticipant @VisitorXML, @CourseID, @FResult OUTPUT, @SAR OUTPUT, @Name OUTPUT, @CourseName OUTPUT, @AdditionalInformation
+			EXEC @ResID = dbo.usp_addNewCourseVisitorParticipant @VisitorXML, @CourseID, @FResult OUTPUT, @SAR OUTPUT, @Name OUTPUT, @CourseName OUTPUT, @AdditionalInformation
 			
 			INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 			SELECT @VisitorNRIC, 'Update', @VisitorXML, 1;
@@ -208,6 +211,8 @@ END CATCH;
 	
 
 SET NOCOUNT OFF;
+
+GO
 GO
 GO
 GO
