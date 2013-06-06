@@ -162,11 +162,6 @@ BEGIN TRY
 			
 			IF(@Result <> 'NotFound')
 			BEGIN
-				IF NOT EXISTS(SELECT 1 FROM dbo.tb_course_participant WHERE NRIC = @VisitorNRIC AND courseID = @CourseID)
-				BEGIN
-					INSERT INTO dbo.tb_course_participant(courseID, NRIC, RegistrationDate, AdditionalInformation)
-					SELECT @CourseID, @VisitorNRIC, @RegistrationDate, @AdditionalInformation
-				END
 				INSERT INTO @NRICDoneTable(NRIC, [Type], [XML], Successful)
 				SELECT @VisitorNRIC, 'Update', @VisitorXML, 1;
 			END
