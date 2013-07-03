@@ -1,8 +1,8 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROCEDURE [dbo].[usp_updateVistor]
 (@updateXML XML,
 @Result VARCHAR(20) OUTPUT)
@@ -240,6 +240,8 @@ BEGIN
 		
 		SET @Result = 'Updated';
 		
+		DECLARE @LogID TABLE(ID INT);
+		INSERT INTO @LogID(ID)
 		EXEC dbo.usp_insertlogging 'I', @UserID, 'VisitorMembership', 'UpdateVisitor', 1, 'NRIC', @candidate_nric, @changesXML;
 	END
 	ELSE
@@ -253,4 +255,5 @@ BEGIN
 END
 
 SET NOCOUNT OFF;
+
 GO
