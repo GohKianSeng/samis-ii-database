@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,6 +20,8 @@ BEGIN
 	INSERT INTO [dbo].[tb_HokkienAttendance]
 	SELECT @ID, CONVERT(DATE, GETDATE())
 END
+
+SELECT [EnglishSurname], [EnglishGivenName], [ChineseSurname], [ChineseGivenName] FROM [dbo].[tb_HokkienMember] WHERE ID = @ID;
 
 SET NOCOUNT OFF;
 

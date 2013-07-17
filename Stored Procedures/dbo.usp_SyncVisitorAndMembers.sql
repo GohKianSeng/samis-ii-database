@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -56,6 +57,15 @@ BEGIN TRY
                 IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @NRIC)
                 OR EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @NRIC)         
                 BEGIN
+						IF EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @NRIC)
+						BEGIN
+							DELETE FROM dbo.tb_membersOtherInfo_temp WHERE NRIC = @NRIC;
+							DELETE FROM dbo.tb_members_temp WHERE NRIC = @NRIC;
+
+							DECLARE @Rest VARCHAR(10) = '0';
+							EXEC @ResID = dbo.usp_addNewMember @NewXML, @Rest OUTPUT
+						END
+
                         IF(@CourseID <> -1)
                         BEGIN
                                 INSERT INTO dbo.tb_course_participant(NRIC, courseID, RegistrationDate, AdditionalInformation)
@@ -216,4 +226,5 @@ END CATCH;
 
 SET NOCOUNT OFF;
 
+GO
 GO
