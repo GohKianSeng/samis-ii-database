@@ -1,14 +1,17 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[usp_getCourseReport]
-(@courseID INT, @TotalDay INT OUT)
+(@courseID INT, @TotalDay INT OUT, @MinAttendance INT OUT, @XML XML OUT, @AttendedAtLeastOnce INT OUT, @AllCompletedCourse INT OUT, @SACCompletedCourse INT OUT, @NonSACCompletedCourse INT OUT, @AnglicanCompletedCourse INT OUT, @NonAnglicanCompletedCourse INT OUT)
 AS
 SET NOCOUNT ON;
 
 	DECLARE @Table TABLE (NRIC VARCHAR(20), Schedule DATE)
-    
+    SET @MinAttendance = (SELECT [MinCompleteAttendance] FROM [dbo].[tb_course] WHERE courseID = @courseID);
+	DECLARE @ParishID INT = (SELECT [value] FROM [dbo].[tb_App_Config] WHERE ConfigName = 'currentparish');
+
 	SELECT @TotalDay = COUNT(1) FROM dbo.udf_Split((SELECT CourseStartDate FROM [dbo].[tb_course] WHERE courseID = @courseID), ',');
 
 	INSERT INTO @Table (NRIC, Schedule)
@@ -34,6 +37,58 @@ SET NOCOUNT ON;
 	LEFT OUTER JOIN [dbo].[tb_congregation] AS I ON I.CongregationID = G.Congregation
 	LEFT OUTER JOIN [dbo].[tb_congregation] AS J ON J.CongregationID = H.Congregation
 	Order by A.NRIC, A.Schedule ASC
+
+	SET @AttendedAtLeastOnce = (SELECT COUNT(DISTINCT NRIC) AS Attended FROM [dbo].[tb_course_Attendance] WHERE CourseID = @courseID);
+
+	DECLARE @CompletedCourse TABLE(NRIC VARCHAR(20), Attended INT)
+
+	INSERT INTO @CompletedCourse
+	SELECT[NRIC] AS Attended, COUNT(1) FROM [dbo].[tb_course_Attendance]
+	WHERE CourseID = @courseID	
+	GROUP BY NRIC;
+
+	SET @AllCompletedCourse = (SELECT COUNT(1) FROM @CompletedCourse WHERE Attended >= @MinAttendance);
+
+	SET @SACCompletedCourse = (SELECT COUNT(1)
+					 FROM @CompletedCourse AS A
+		LEFT OUTER JOIN [dbo].[tb_visitors] AS C ON C.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_members] AS D ON D.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_members_temp] AS E ON E.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = C.Church
+		WHERE ISNULL(F.ParishID, @ParishID) = @ParishID
+		AND Attended >= @MinAttendance);
+
+
+	SET @NonSACCompletedCourse = (SELECT COUNT(1)
+					 FROM @CompletedCourse AS A
+		LEFT OUTER JOIN [dbo].[tb_visitors] AS C ON C.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_members] AS D ON D.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_members_temp] AS E ON E.NRIC = A.NRIC
+		LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = C.Church
+		WHERE ISNULL(F.ParishID, @ParishID) <> @ParishID
+		AND Attended >= @MinAttendance);
+
+	SET @AnglicanCompletedCourse = (SELECT COUNT(1)
+			     FROM @CompletedCourse AS A
+	LEFT OUTER JOIN [dbo].[tb_visitors] AS C ON C.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_members] AS D ON D.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_members_temp] AS E ON E.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = C.Church
+	WHERE ISNULL(F.ParishID, @ParishID) <> 28
+	AND Attended >= @MinAttendance);
+
+	SET @NonAnglicanCompletedCourse = (SELECT COUNT(1)
+			     FROM @CompletedCourse AS A
+	LEFT OUTER JOIN [dbo].[tb_visitors] AS C ON C.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_members] AS D ON D.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_members_temp] AS E ON E.NRIC = A.NRIC
+	LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = C.Church
+	WHERE ISNULL(F.ParishID, @ParishID) = 28
+	AND Attended >= @MinAttendance);
+
+	SET @XML = (SELECT CONVERT(DATE, A.items, 103) AS [Date], Count(1) As DailyTotal FROM dbo.udf_Split((SELECT CourseStartDate FROM [dbo].[tb_course] WHERE courseID = @courseID), ',') AS A
+	LEFT OUTER JOIN [dbo].[tb_course_Attendance] AS B ON CONVERT(DATE, A.items, 103) = B.[Date] AND B.CourseID = @courseID
+	GROUP BY A.items Order By CONVERT(DATE, A.items, 103) FOR XML PATH('Attendance'), ROOT('DailyAttendance'));	
 
 SET NOCOUNT OFF;
 GO

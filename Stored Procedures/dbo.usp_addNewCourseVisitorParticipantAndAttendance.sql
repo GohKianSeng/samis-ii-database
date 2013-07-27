@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -28,6 +29,15 @@ DECLARE @today DATE = GETDATE();
 IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
 OR EXISTS (SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
 BEGIN
+
+	Update dbo.tb_visitors
+	SET Salutation = @salutation, NRIC = @nric, EnglishName = @english_name, 
+	DOB = @dob, Gender = @gender, Education = @education, Occupation = @occupation, 
+	Nationality = @nationality, Email = @email, Contact = @contact, AddressStreet = @street_address,
+	AddressHouseBlk = @blk_house, AddressPostalCode = @postal_code, AddressUnit = @unit,
+	Church = @church, ChurchOthers = @church_others
+	WHERE NRIC = @nric
+
 	EXEC dbo.usp_UpdateCourseAttendance @course, @NRIC, @today;
 END
 ELSE
@@ -50,7 +60,8 @@ BEGIN
 	EXEC dbo.usp_UpdateCourseAttendance @course, @NRIC, @today;
 	
 	DECLARE @newVisitorXML XML = (
-	SELECT  C.SalutationName, A.EnglishName, A.AddressUnit,
+	SELECT  A.NRIC,
+			C.SalutationName, A.EnglishName, A.AddressUnit,
 			A.AddressHouseBlk, ISNULL(D.CountryName, '') AS Nationality, F.OccupationName AS Occupation,
 			A.NRIC,
 			A.DOB, dbo.udf_getGender(A.Gender) AS Gender, A.AddressStreet,

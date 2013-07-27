@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -30,6 +31,8 @@ BEGIN
 	DELETE FROM dbo.tb_course_participant WHERE NRIC = @NRIC;
 	DELETE FROM dbo.tb_visitors WHERE NRIC = @NRIC;
 END
+
+DELETE FROM [dbo].[tb_DOSLogging] WHERE [Reference] = @NRIC;
 
 SELECT @@ROWCOUNT AS Result
 

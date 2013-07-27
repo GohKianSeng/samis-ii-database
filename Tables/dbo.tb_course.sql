@@ -12,7 +12,8 @@ CREATE TABLE [dbo].[tb_course]
 [Deleted] [bit] NOT NULL CONSTRAINT [DF_tb_course_Deleted] DEFAULT ((0)),
 [Fee] [decimal] (5, 2) NOT NULL CONSTRAINT [DF_tb_course_Fee] DEFAULT ((0.00)),
 [LastRegistrationDate] [date] NOT NULL,
-[AdditionalQuestion] [int] NOT NULL CONSTRAINT [DF_tb_course_AdditionalQuestion] DEFAULT ((1))
+[AdditionalQuestion] [int] NOT NULL CONSTRAINT [DF_tb_course_AdditionalQuestion] DEFAULT ((1)),
+[MinCompleteAttendance] [int] NOT NULL CONSTRAINT [DF_tb_course_MinPercentage] DEFAULT ((1))
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[tb_course] ADD 
 CONSTRAINT [PK_tb_course] PRIMARY KEY CLUSTERED  ([courseID]) ON [PRIMARY]

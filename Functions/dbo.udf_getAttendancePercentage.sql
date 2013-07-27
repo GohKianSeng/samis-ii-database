@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,10 +20,10 @@ BEGIN
 
 	DECLARE @TotalDayConducted INT = (SELECT COUNT(*) FROM @AttendanceTable WHERE Attended <> '??');
 	DECLARE @TotalDayAttended INT = (SELECT COUNT(*) FROM @AttendanceTable WHERE Attended = 'Yes');
-	DECLARE @AttandancePercentage NUMERIC(6,2) = 0;
+	DECLARE @AttandancePercentage NUMERIC(6,0) = 0;
 	IF(@TotalDayConducted > 0)
 	BEGIN
-		SET @AttandancePercentage  = (SELECT CONVERT(NUMERIC(4,2), @TotalDayAttended) / CONVERT(NUMERIC(4,2), @TotalDayConducted) * 100);
+		SET @AttandancePercentage  = (SELECT CONVERT(NUMERIC(4,0), @TotalDayAttended) / CONVERT(NUMERIC(4,2), @TotalDayConducted) * 100);
 	END
 	
 	IF(@type = 'percentage')
