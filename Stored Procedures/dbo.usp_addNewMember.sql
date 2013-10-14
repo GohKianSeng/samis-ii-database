@@ -56,8 +56,9 @@ DECLARE @UserID VARCHAR(50),
 @confirm_by_others VARCHAR(100),
 @baptism_church_others VARCHAR(100),
 @confirm_church_others VARCHAR(100),
-@previous_church_others VARCHAR(100)
-
+@previous_church_others VARCHAR(100),
+@candidate_mailingList VARCHAR(3),
+@candidate_mailingListBoolean BIT = 0;
 
 
 
@@ -65,7 +66,7 @@ DECLARE @UserID VARCHAR(50),
 DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @newXML;
 	
-    SELECT @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
+    SELECT @candidate_mailingList = mailingLIst, @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
 	@candidate_english_name = EnglishName, @candidate_chinses_name = ChineseName, @candidate_gender = Gender, @candidate_dob = CONVERT(DATETIME, DOB, 103),
 	@candidate_marital_status = MaritalStatus, @candidate_marriage_date = MarriageDate, @candidate_nationality = Nationality,
 	@candidate_dialect = Dialect, @candidate_photo = Photo, @candidate_street_address = AddressStreetName, @candidate_blk_house = AddressBlkHouse,
@@ -123,12 +124,13 @@ DECLARE @idoc int;
 	BaptismChurchOthers VARCHAR(100) './BaptismChurchOthers',
 	ConfirmByOthers VARCHAR(100) './ConfirmByOthers',
 	ConfirmChurchOthers VARCHAR(100) './ConfirmChurchOthers',
+	mailingList VARCHAR(3) './mailingList',
 	PreviousChurchOthers VARCHAR(100) './PreviousChurchOthers');
 
-
-
-
-
+IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
 
 IF(LEN(@candidate_baptism_date) = 0)
 BEGIN
@@ -175,7 +177,7 @@ BEGIN
 							AddressPostalCode, Email, Education, [Language],
 							HomeTel, MobileTel, BaptismDate, ConfirmDate,
 							MarriageDate, CurrentParish, Family, Child, TransferReason,
-							BaptismByOthers, ConfirmByOthers , BaptismChurchOthers , ConfirmChurchOthers , PreviousChurchOthers)
+							BaptismByOthers, ConfirmByOthers , BaptismChurchOthers , ConfirmChurchOthers , PreviousChurchOthers, ReceiveMailingList)
 	SELECT  @candidate_salutation, @candidate_photo,
 			@candidate_english_name, @candidate_unit,
 			@candidate_blk_house, @candidate_nationality,
@@ -197,7 +199,8 @@ BEGIN
 			@confirm_by_others,
 			@baptism_church_others,
 			@confirm_church_others,
-			@previous_church_others;
+			@previous_church_others,
+			@candidate_mailingListBoolean;
 			
 			SET @Result = @@ROWCOUNT;
 			

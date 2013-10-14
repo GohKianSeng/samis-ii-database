@@ -1,13 +1,14 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[usp_addNewCourseMemberParticipantAndAttendance]
 (@NRIC VARCHAR(100),
- @courseid int)
+ @courseid int,
+ @today DateTime)
 AS
 SET NOCOUNT ON;
-DECLARE @today DATE = GETDATE();
 
 IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @NRIC)
 BEGIN

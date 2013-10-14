@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -62,13 +63,15 @@ DECLARE @UserID VARCHAR(50),
 @Filename VARCHAR(200),
 @GUID VARCHAR(50),
 @Filetype VARCHAR(3),
-@Fileremarks VARCHAR(1000)
+@Fileremarks VARCHAR(1000),
+@candidate_mailingList VARCHAR(3),
+@candidate_mailingListBoolean BIT = 0;
 
 
 	DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @updateXML;
 	
-    SELECT @UserID = EnteredBy, @candidate_original_nric = OriginalNric, @candidate_nric = NRIC, @candidate_salutation = Salutation,
+    SELECT @candidate_mailingList = mailingLIst, @UserID = EnteredBy, @candidate_original_nric = OriginalNric, @candidate_nric = NRIC, @candidate_salutation = Salutation,
 	@candidate_english_name = EnglishName, @candidate_chinses_name = ChineseName, @candidate_gender = Gender, @candidate_dob = CONVERT(DATETIME, DOB, 103),
 	@candidate_marital_status = MaritalStatus, @candidate_marriage_date = MarriageDate, @candidate_nationality = Nationality,
 	@candidate_dialect = Dialect, @candidate_photo = Photo, @candidate_street_address = AddressStreetName, @candidate_blk_house = AddressBlkHouse,
@@ -137,7 +140,13 @@ DECLARE @UserID VARCHAR(50),
 	ConfirmChurchOthers VARCHAR(100) './ConfirmChurchOthers',
 	PreviousChurchOthers VARCHAR(100) './PreviousChurchOthers',
 	TransferTo VARCHAR(100) './TransferTo',
+	mailingList VARCHAR(3) './mailingList',
 	TransferToDate VARCHAR(100) './TransferToDate');
+
+IF(@candidate_mailingList = 'ON')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
 
 DECLARE @rowcount INT
 SET @rowcount = 0
@@ -280,6 +289,7 @@ BEGIN
 	DECLARE @Orig_candidate_MemberDate VARCHAR(15)
 	DECLARE @Orig_family XML
 	DECLARE @Orig_child XML
+	DECLARE @Orig_candidate_mailingList VARCHAR(3)
 	
 	DECLARE @Orig_baptism_by_others VARCHAR(100),
 	@Orig_confirm_by_others VARCHAR(100),
@@ -352,7 +362,7 @@ BEGIN
 										  MinistryName VARCHAR(100))										  
 																																
 
-	SELECT  @Orig_candidate_salutation = Salutation, @Orig_candidate_photo = ICPhoto, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
+	SELECT  @Orig_candidate_mailingList = ReceiveMailingList, @Orig_candidate_salutation = Salutation, @Orig_candidate_photo = ICPhoto, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
 			@Orig_candidate_blk_house = AddressHouseBlk, @Orig_candidate_nationality = Nationality, @Orig_candidate_dialect = Dialect, @Orig_candidate_occupation = Occupation, @Orig_baptized_by = BaptismBy, @Orig_baptism_church = BaptismChurch,
 			@Orig_confirmation_by = ConfirmBy, @Orig_confirmation_church = ConfirmChurch, @Orig_previous_church_membership = PreviousChurch, @Orig_candidate_chinses_name = ChineseName,
 			@Orig_candidate_dob = DOB, @Orig_candidate_gender = Gender, @Orig_candidate_marital_status = MaritalStatus, @Orig_candidate_street_address = AddressStreet,
@@ -379,6 +389,11 @@ BEGIN
 		
 		INSERT INTO dbo.tb_members_attachments([DATE], NRIC, [GUID], [Filename], FileType, Remarks)
 		SELECT GETDATE(), @candidate_nric, @GUID, @Filename, @Filetype, @Fileremarks;
+	END
+
+	IF(@Orig_candidate_mailingList <> @candidate_mailingListBoolean)
+	BEGIN
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Add Mailing List', @Orig_candidate_mailingList, @candidate_mailingListBoolean);		
 	END
 
 	IF(@candidate_original_nric <> @candidate_nric)
@@ -798,7 +813,8 @@ BEGIN
 							ConfirmByOthers = @confirm_by_others,
 							BaptismChurchOthers = @baptism_church_others,
 							ConfirmChurchOthers = @confirm_church_others,
-							PreviousChurchOthers = @previous_church_others
+							PreviousChurchOthers = @previous_church_others,
+							ReceiveMailingList = @candidate_mailingListBoolean
 		WHERE NRIC = @candidate_original_nric
 			
 		UPDATE dbo.tb_membersOtherInfo SET Congregation = @candidate_congregation,
@@ -831,4 +847,5 @@ END
 
 SET NOCOUNT OFF;
 
+GO
 GO

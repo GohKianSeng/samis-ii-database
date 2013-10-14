@@ -1,14 +1,16 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROCEDURE [dbo].[usp_getVisitorInformation]
 (@NRIC VARCHAR(20))
 AS
 SET NOCOUNT ON;
 
 
-	SELECT [EnglishName], CONVERT(VARCHAR(5), [Salutation]) AS Salutation
+	SELECT ReceiveMailingList AS mailingList, [EnglishName], CONVERT(VARCHAR(5), [Salutation]) AS Salutation
       ,ISNULL(CONVERT(VARCHAR(10),[DOB],103), '') AS DOB ,[Gender] ,@NRIC AS [NRIC] , CONVERT(VARCHAR(5),[Nationality]) AS [Nationality]
       ,[AddressStreet] ,[AddressHouseBlk] , ISNULL(CONVERT(VARCHAR(6),[AddressPostalCode]),'' ) AS [AddressPostalCode] ,[AddressUnit] ,[Email]
       ,CONVERT(VARCHAR(5), [Education]) AS Education , CONVERT(VARCHAR(5),[Occupation]) AS [Occupation], Contact 
@@ -28,4 +30,5 @@ SET NOCOUNT ON;
 
 
 SET NOCOUNT OFF;
+
 GO

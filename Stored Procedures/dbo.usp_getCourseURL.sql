@@ -1,0 +1,15 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+CREATE PROCEDURE [dbo].[usp_getCourseURL]
+(@CourseID INT, @CourseURL VARCHAR(2000) OUT)
+AS
+SET NOCOUNT ON;
+
+	SELECT @CourseURL = [URLLink] FROM [dbo].[tb_course] WHERE courseID = @CourseID
+
+SET NOCOUNT OFF;
+
+GO

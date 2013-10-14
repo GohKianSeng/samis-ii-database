@@ -16,7 +16,8 @@ CREATE TABLE [dbo].[tb_visitors]
 [AddressUnit] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [Church] [tinyint] NOT NULL CONSTRAINT [DF_tb_visitors_Church] DEFAULT ((0)),
 [ChurchOthers] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_tb_visitors_ChurchOthers] DEFAULT (''),
-[VisitorType] [tinyint] NOT NULL
+[VisitorType] [tinyint] NOT NULL,
+[ReceiveMailingList] [bit] NOT NULL CONSTRAINT [DF_tb_visitors_ReceiveMailingList] DEFAULT ((0))
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[tb_visitors] ADD CONSTRAINT [PK_tb_visitors] PRIMARY KEY CLUSTERED  ([NRIC]) ON [PRIMARY]

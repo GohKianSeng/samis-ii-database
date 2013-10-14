@@ -3,6 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROCEDURE [dbo].[usp_UpdateCourseAttendance]
 (@courseid INT,
  @nric VARCHAR(20),
@@ -33,7 +34,7 @@ BEGIN
 			  INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
 			  WHERE A.courseID = @courseid AND A.NRIC = @nric
 			
-			  SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+			  SELECT 'Welcome <label style="color:lime; font-size:xx-large;border-bottom-style: solid; border-bottom-width: 5px">' + @name + '</label>, thank you for attending, ' + @coursename AS Result;
 		END
 		ELSE
 		BEGIN
@@ -44,7 +45,7 @@ BEGIN
 			  INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
 			  WHERE A.courseID = @courseid AND A.NRIC = @nric
 			
-			  SELECT 'Welcome ' + @name + ', your attendance registered, ' + @coursename AS Result;
+			  SELECT 'Welcome <label style="color:lime; font-size:xx-large;border-bottom-style: solid; border-bottom-width: 5px">' + @name + '</label>, your attendance registered, ' + @coursename AS Result;
 		END
 	END
 	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
@@ -60,7 +61,7 @@ BEGIN
 	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
 	    WHERE A.courseID = @courseid AND A.NRIC = @nric
 	
-	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+	    SELECT 'Welcome <label style="color:lime; font-size:xx-large;border-bottom-style: solid; border-bottom-width: 5px">' + @name + '</label>, thank you for attending, ' + @coursename AS Result;
 		
 	END
 	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @nric)
@@ -76,7 +77,7 @@ BEGIN
 	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
 	    WHERE A.courseID = @courseid AND A.NRIC = @nric
 	
-	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+	    SELECT 'Welcome <label style="color:lime; font-size:xx-large;border-bottom-style: solid; border-bottom-width: 5px">' + @name + '</label>, thank you for attending, ' + @coursename AS Result;
 	END
 	ELSE IF EXISTS(SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
 	BEGIN
@@ -91,18 +92,19 @@ BEGIN
 	    INNER JOIN dbo.tb_course AS E ON E.courseID = A.courseID
 	    WHERE A.courseID = @courseid AND A.NRIC = @nric
 	
-	    SELECT 'Welcome ' + @name + ', thank you for attending, ' + @coursename AS Result;
+	    SELECT 'Welcome <label style="color:lime; font-size:xx-large;border-bottom-style: solid; border-bottom-width: 5px">' + @name + '</label>, thank you for attending, ' + @coursename AS Result;
 	END
 	ELSE
 	BEGIN
-		SELECT 'Sorry you are not registered.' AS Result;
+		SELECT '<label style="color:red;font-size:xx-large;">Sorry you are not registered.</label>' AS Result;
 	END
 END
 ELSE
 BEGIN
 	SELECT @coursename = CourseName FROM dbo.tb_course WHERE courseID = @courseid
-	SELECT 'Sorry, there no class for, ' + @coursename AS Result;
+	SELECT '<label style="color:red;font-size:xx-large;">Sorry, there no class for, ' + @coursename + ' on ' + CONVERT(VARCHAR(10), @DATE,103) + '</label>'AS Result;
 END
 
 SET NOCOUNT OFF;
+
 GO

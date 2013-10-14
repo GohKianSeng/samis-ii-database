@@ -23,12 +23,14 @@ DECLARE @UserID VARCHAR(50),
 @candidate_postal_code INT,
 @candidate_email VARCHAR(100),
 @candidate_education VARCHAR(3),
-@candidate_mobile_tel VARCHAR(15)
+@candidate_mobile_tel VARCHAR(15),
+@candidate_mailingList VARCHAR(3),
+@candidate_mailingListBoolean BIT = 0;
 
 	DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @updateXML;
 	
-    SELECT @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
+    SELECT @candidate_mailingList = mailingLIst, @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
 	@candidate_english_name = EnglishName, @candidate_gender = Gender, @candidate_dob = CONVERT(DATETIME, DOB, 103),
 	@candidate_nationality = Nationality,
 	@candidate_street_address = AddressStreetName, @candidate_blk_house = AddressBlkHouse,
@@ -50,7 +52,13 @@ DECLARE @UserID VARCHAR(50),
 	MobileTel VARCHAR(15) './Contact',
 	Email VARCHAR(100) './Email',
 	Education VARCHAR(3) './Education',
+	mailingList VARCHAR(3) './mailingList',
 	Occupation VARCHAR(3) './Occupation');
+
+IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
 
 DECLARE @rowcount INT
 SET @rowcount = 0
@@ -94,19 +102,25 @@ BEGIN
 	DECLARE @Orig_candidate_email VARCHAR(100)
 	DECLARE @Orig_candidate_education VARCHAR(3)
 	DECLARE @Orig_candidate_mobile_tel VARCHAR(15)	
-	
+	DECLARE @Orig_candidate_mailingList VARCHAR(3)
+
 	DECLARE @ChangesTable TABLE (
 			ElementName VARCHAR(100),
 			[From] VARCHAR(MAX),
 			[To] VARCHAR(MAX));
 	
-	SELECT  @Orig_candidate_salutation = Salutation, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
+	SELECT  @Orig_candidate_mailingList = ReceiveMailingList, @Orig_candidate_salutation = Salutation, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
 			@Orig_candidate_blk_house = AddressHouseBlk, @Orig_candidate_nationality = Nationality, @Orig_candidate_occupation = Occupation,
 			@Orig_candidate_dob = DOB, @Orig_candidate_gender = Gender, @Orig_candidate_street_address = AddressStreet,
 			@Orig_candidate_postal_code = AddressPostalCode, @Orig_candidate_email = Email, @Orig_candidate_education = Education,
 			@Orig_candidate_mobile_tel = MobileTel
 	FROM dbo.tb_members AS A
 	WHERE A.NRIC = @candidate_nric
+
+	IF(@Orig_candidate_mailingList <> @candidate_mailingListBoolean)
+	BEGIN
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Add Mailing List', @Orig_candidate_mailingList, @candidate_mailingListBoolean);		
+	END
 
 	IF(@Orig_candidate_salutation <> @candidate_salutation AND @candidate_salutation <> '0')
 	BEGIN
@@ -213,7 +227,8 @@ BEGIN
 							AddressPostalCode = @Orig_candidate_postal_code,
 							Email = @Orig_candidate_email,
 							Education = @Orig_candidate_education,
-							MobileTel = @Orig_candidate_mobile_tel
+							MobileTel = @Orig_candidate_mobile_tel,
+							ReceiveMailingList = @candidate_mailingListBoolean
 							
 		WHERE NRIC = @candidate_nric
 			

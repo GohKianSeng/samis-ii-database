@@ -23,7 +23,7 @@ ELSE
 BEGIN
 	SELECT courseID, CourseName, REPLACE(CourseStartDate, ',', ', ')AS CourseStartDate, CourseEndDate, CourseStartTime, CourseEndTime, E.AreaName AS courseLocation, dbo.udf_getStafforMemberName(A.CourseInCharge) AS Name FROM dbo.tb_course AS A
 	LEFT OUTER JOIN dbo.tb_churchArea AS E ON E.AreaID = A.courseLocation
-	WHERE dbo.udf_isCourseStillRunning(CourseStartDate, DATEADD(day, -14, @today)) = 1
+	WHERE dbo.udf_isCourseStillRunning(CourseStartDate, DATEADD(day, -60, @today)) = 1
 	ORDER BY CourseName ASC
 END
 

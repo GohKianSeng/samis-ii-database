@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -26,12 +27,14 @@ DECLARE @UserID VARCHAR(50),
 @candidate_contact VARCHAR(15),
 @candidate_education VARCHAR(3),
 @candidate_church VARCHAR(3),
-@candidate_churchOthers VARCHAR(100)
+@candidate_churchOthers VARCHAR(100),
+@candidate_mailingList VARCHAR(3),
+@candidate_mailingListBoolean BIT = 0;
 
 	DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @updateXML;
 	
-    SELECT @UserID = EnteredBy, @candidate_original_nric = OriginalNric, @candidate_nric = NRIC, @candidate_salutation = Salutation,
+    SELECT @candidate_mailingList =mailingList, @UserID = EnteredBy, @candidate_original_nric = OriginalNric, @candidate_nric = NRIC, @candidate_salutation = Salutation,
 	@candidate_english_name = EnglishName, @candidate_gender = Gender, @candidate_dob = DOB,
 	@candidate_nationality = Nationality, @candidate_contact = Contact,
 	@candidate_street_address = AddressStreetName, @candidate_blk_house = AddressBlkHouse,
@@ -56,8 +59,14 @@ DECLARE @UserID VARCHAR(50),
 	Email VARCHAR(100) './Email',
 	Education VARCHAR(3) './Education',
 	Occupation VARCHAR(3) './Occupation',
+	mailingList VARCHAR(3) './mailingList',
 	Church VARCHAR(3) './Church',
 	ChurchOthers VARCHAR(100) './ChurchOthers');	
+
+IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
 
 DECLARE @rowcount INT
 SET @rowcount = 0
@@ -106,13 +115,14 @@ BEGIN
 	DECLARE @Orig_candidate_contact VARCHAR(15)
 	DECLARE @Orig_candidate_church VARCHAR(3)
 	DECLARE @Orig_candidate_church_others VARCHAR(100)
+	DECLARE @Orig_candidate_mailingList VARCHAR(3)
 
 	DECLARE @ChangesTable TABLE (
 			ElementName VARCHAR(100),
 			[From] VARCHAR(MAX),
 			[To] VARCHAR(MAX));																									
 
-	SELECT  @Orig_candidate_salutation = Salutation, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
+	SELECT  @Orig_candidate_mailingList = ReceiveMailingList, @Orig_candidate_salutation = Salutation, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
 			@Orig_candidate_blk_house = AddressHouseBlk, @Orig_candidate_nationality = Nationality, @Orig_candidate_occupation = Occupation,
 			@Orig_candidate_dob = ISNULL(CONVERT(VARCHAR(15),DOB,103),''), @Orig_candidate_gender = Gender, @Orig_candidate_street_address = AddressStreet,
 			@Orig_candidate_postal_code = AddressPostalCode, @Orig_candidate_email = Email, @Orig_candidate_education = Education,
@@ -120,6 +130,11 @@ BEGIN
 	FROM dbo.tb_visitors AS A
 	WHERE A.NRIC = @candidate_original_nric;
 	
+	IF(@Orig_candidate_mailingList <> @candidate_mailingListBoolean)
+	BEGIN
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Add Mailing List', @Orig_candidate_mailingList, @candidate_mailingListBoolean);		
+	END
+
 	IF(@candidate_original_nric <> @candidate_nric)
 	BEGIN
 		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('NRIC', @candidate_original_nric, @candidate_nric);		
@@ -235,7 +250,8 @@ BEGIN
 							Email = @candidate_email,
 							Education = @candidate_education,
 							Church = CONVERT(TINYINT,@candidate_church),
-							ChurchOthers = @candidate_churchOthers
+							ChurchOthers = @candidate_churchOthers,
+							ReceiveMailingList = @candidate_mailingListBoolean
 		WHERE NRIC = @candidate_original_nric
 		
 		SET @Result = 'Updated';

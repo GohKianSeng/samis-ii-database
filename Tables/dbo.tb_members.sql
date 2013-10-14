@@ -39,7 +39,8 @@ CREATE TABLE [dbo].[tb_members]
 [PreviousChurchOthers] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_tb_members_PreviousChurchOthers] DEFAULT (''),
 [DeceasedDate] [date] NULL,
 [CreatedDate] [date] NOT NULL CONSTRAINT [DF_tb_members_CreatedDate] DEFAULT (getdate()),
-[CarIU] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_tb_members_CarIU] DEFAULT ('')
+[CarIU] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_tb_members_CarIU] DEFAULT (''),
+[ReceiveMailingList] [bit] NOT NULL CONSTRAINT [DF_tb_members_ReceiveMailingList] DEFAULT ((0))
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[tb_members] ADD CONSTRAINT [PK_tb_members] PRIMARY KEY CLUSTERED  ([NRIC]) ON [PRIMARY]

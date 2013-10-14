@@ -4,7 +4,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[usp_addNewCourseVisitorParticipantAndAttendance]
-(@nric VARCHAR(10),
+(@mailingList VARCHAR(3), @nric VARCHAR(10),
 @course VARCHAR(10),
 @salutation VARCHAR(10),
 @english_name VARCHAR(50),
@@ -20,23 +20,22 @@ CREATE PROCEDURE [dbo].[usp_addNewCourseVisitorParticipantAndAttendance]
 @contact  VARCHAR(15),
 @email  VARCHAR(100),
 @church INT,
-@church_others VARCHAR(100), @UserID VARCHAR(50))
+@church_others VARCHAR(100), @UserID VARCHAR(50),
+@today DateTime)
 AS
 SET NOCOUNT ON;
 
-DECLARE @today DATE = GETDATE();
+DECLARE @candidate_mailingListBoolean BIT = 0;
+IF(@mailingList = 'ON')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
+
 
 IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
 OR EXISTS (SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
+OR EXISTS (SELECT 1 FROM dbo.tb_members_temp WHERE NRIC = @nric)
 BEGIN
-
-	Update dbo.tb_visitors
-	SET Salutation = @salutation, NRIC = @nric, EnglishName = @english_name, 
-	DOB = @dob, Gender = @gender, Education = @education, Occupation = @occupation, 
-	Nationality = @nationality, Email = @email, Contact = @contact, AddressStreet = @street_address,
-	AddressHouseBlk = @blk_house, AddressPostalCode = @postal_code, AddressUnit = @unit,
-	Church = @church, ChurchOthers = @church_others
-	WHERE NRIC = @nric
 
 	EXEC dbo.usp_UpdateCourseAttendance @course, @NRIC, @today;
 END
@@ -51,8 +50,8 @@ BEGIN
 		SET @dob = NULL;
 	END
 
-	INSERT INTO dbo.tb_visitors(Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
-	SELECT @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
+	INSERT INTO dbo.tb_visitors(ReceiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
+	SELECT @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
 	
 	INSERT INTO dbo.tb_course_participant(NRIC, courseID)
 	SELECT @nric, @course;

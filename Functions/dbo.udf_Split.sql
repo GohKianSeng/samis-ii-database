@@ -1,13 +1,14 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE FUNCTION [dbo].[udf_Split](@String varchar(8000), @Delimiter char(1))       
-returns @temptable TABLE (items varchar(8000))       
+CREATE FUNCTION [dbo].[udf_Split](@String varchar(MAX), @Delimiter char(1))       
+returns @temptable TABLE (items varchar(100))       
 as       
 begin       
     declare @idx int;       
-    declare @slice varchar(8000);       
+    declare @slice varchar(MAX);       
       
     select @idx = 1;       
         if len(@String)<1 or @String is null  return;       

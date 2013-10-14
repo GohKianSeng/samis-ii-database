@@ -13,7 +13,7 @@ DECLARE @tNRIC VARCHAR(20) = @NRIC, @tType VARCHAR(10) = @Type;
 
 IF(@tType = 'Actual')
 BEGIN
-	SELECT [EnglishName], CONVERT(INT, [Salutation]) AS Salutation
+	SELECT ReceiveMailingList, [EnglishName], CONVERT(INT, [Salutation]) AS Salutation
       ,[ChineseName],[DOB] ,[Gender] ,@tNRIC AS [NRIC] ,[Nationality] ,[Dialect] ,[MaritalStatus]
       ,[MarriageDate]  ,[AddressStreet] ,[AddressHouseBlk] ,[AddressPostalCode] ,[AddressUnit] ,[Email]
       ,[Education] ,[Language] ,[Occupation] ,[HomeTel] ,[MobileTel] ,[BaptismDate]
@@ -38,7 +38,7 @@ BEGIN
 END
 ELSE IF(@tType = 'Temp')
 BEGIN
-	SELECT [EnglishName], CONVERT(INT, [Salutation]) AS Salutation
+	SELECT ReceiveMailingList, [EnglishName], CONVERT(INT, [Salutation]) AS Salutation
       ,[ChineseName],[DOB] ,[Gender] ,@tNRIC AS [NRIC] ,[Nationality] ,[Dialect] ,[MaritalStatus]
       ,[MarriageDate]  ,[AddressStreet] ,[AddressHouseBlk] ,[AddressPostalCode] ,[AddressUnit] ,[Email]
       ,[Education] ,[Language] ,[Occupation] ,[HomeTel] ,[MobileTel] ,[BaptismDate]
@@ -63,4 +63,5 @@ BEGIN
 END
 
 SET NOCOUNT OFF;
+
 GO

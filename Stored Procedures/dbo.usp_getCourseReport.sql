@@ -86,9 +86,14 @@ SET NOCOUNT ON;
 	WHERE ISNULL(F.ParishID, @ParishID) = 28
 	AND Attended >= @MinAttendance);
 
-	SET @XML = (SELECT CONVERT(DATE, A.items, 103) AS [Date], Count(1) As DailyTotal FROM dbo.udf_Split((SELECT CourseStartDate FROM [dbo].[tb_course] WHERE courseID = @courseID), ',') AS A
-	LEFT OUTER JOIN [dbo].[tb_course_Attendance] AS B ON CONVERT(DATE, A.items, 103) = B.[Date] AND B.CourseID = @courseID
-	GROUP BY A.items Order By CONVERT(DATE, A.items, 103) FOR XML PATH('Attendance'), ROOT('DailyAttendance'));	
+	DECLARE @CountAttendanceTable TABLE(MyDate DATE, Attended INT);
+	INSERT INTO @CountAttendanceTable
+	SELECT [Date], Count(1) AS Attendance FROM [dbo].[tb_course_Attendance] WHERE CourseID = @courseID
+	GROUP BY [Date]
+
+	SET @XML = (SELECT CONVERT(DATE, A.items, 103) AS [Date], ISNULL(B.Attended,0) As DailyTotal FROM dbo.udf_Split((SELECT CourseStartDate FROM [dbo].[tb_course] WHERE courseID = @courseID), ',') AS A
+	LEFT OUTER JOIN @CountAttendanceTable AS B ON CONVERT(DATE, A.items, 103) = B.MyDate
+	Order By CONVERT(DATE, A.items, 103) FOR XML PATH('Attendance'), ROOT('DailyAttendance'));	
 
 SET NOCOUNT OFF;
 GO

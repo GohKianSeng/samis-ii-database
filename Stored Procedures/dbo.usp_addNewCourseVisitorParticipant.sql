@@ -30,12 +30,14 @@ DECLARE @nric VARCHAR(20),
 @contact  VARCHAR(15),
 @email  VARCHAR(100),
 @church INT,
-@church_others VARCHAR(100), @UserID VARCHAR(50)
+@church_others VARCHAR(100), @UserID VARCHAR(50),
+@candidate_mailingList VARCHAR(3),
+@candidate_mailingListBoolean BIT = 0;
 
 	DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @Visitor;
 	
-    SELECT @UserID = EnteredBy, @nric = OriginalNric, @salutation = Salutation,
+    SELECT @candidate_mailingList = mailingList, @UserID = EnteredBy, @nric = OriginalNric, @salutation = Salutation,
 	@english_name = EnglishName, @gender = Gender, @dob = CONVERT(DATETIME, DOB, 103),
 	@nationality = Nationality, @contact = Contact,
 	@street_address = AddressStreetName, @blk_house = AddressBlkHouse,
@@ -60,8 +62,14 @@ DECLARE @nric VARCHAR(20),
 	Email VARCHAR(100) './Email',
 	Education VARCHAR(3) './Education',
 	Occupation VARCHAR(3) './Occupation',
+	mailingList VARCHAR(3) './mailingList',
 	Church VARCHAR(3) './Church',
 	ChurchOthers VARCHAR(3) './ChurchOthers');
+
+IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
+BEGIN
+	SET @candidate_mailingListBoolean = 1;
+END
 
 IF EXISTS (SELECT 1 FROM dbo.tb_visitors WHERE NRIC = @nric)
 OR EXISTS (SELECT 1 FROM dbo.tb_members WHERE NRIC = @nric)
@@ -85,12 +93,13 @@ BEGIN
 	BEGIN
 		UPDATE dbo.tb_course_participant SET AdditionalInformation = @AdditionalInformation WHERE NRIC = @nric AND courseID = @course;
 		
-		SELECT @FinalResult = 'EXISTS', @FinalSalutation = '', @FinalEnglishName = @english_name, @FinalCourseName = CourseName FROM dbo.tb_course WHERE courseID = @course;		
+		SELECT @FinalResult = 'EXISTS', @FinalSalutation = @salutation, @FinalEnglishName = @english_name, @FinalCourseName = CourseName FROM dbo.tb_course WHERE courseID = @course;		
 		return;
 	END
 	ELSE
 	BEGIN
 		EXEC dbo.usp_addNewCourseMemberParticipant @nric, @course, @AdditionalInformation
+		SELECT @FinalResult = 'OK', @FinalSalutation = @salutation, @FinalEnglishName = @english_name, @FinalCourseName = CourseName FROM dbo.tb_course WHERE courseID = @course;
 		return;
 	END
 END
@@ -106,8 +115,8 @@ BEGIN
 		SET @dob = NULL;
 	END
 	
-	INSERT INTO dbo.tb_visitors(Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
-	SELECT @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
+	INSERT INTO dbo.tb_visitors(receiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
+	SELECT @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
 	
 	INSERT INTO dbo.tb_course_participant(NRIC, courseID, AdditionalInformation)
 	SELECT @nric, @course, ISNULL(@AdditionalInformation, '<div />');
