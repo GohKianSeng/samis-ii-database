@@ -128,11 +128,11 @@ BEGIN
 		SET @Orig_candidate_salutation = @candidate_salutation;
 	END
 
-	IF(@Orig_candidate_english_name <> @candidate_english_name AND LEN(@candidate_english_name) >0)
-	BEGIN
-		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('English Name', @Orig_candidate_english_name, @candidate_english_name);
-		SET @Orig_candidate_english_name = @candidate_english_name;
-	END
+	--IF(@Orig_candidate_english_name <> @candidate_english_name AND LEN(@candidate_english_name) >0)
+	--BEGIN
+	--	INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('English Name', @Orig_candidate_english_name, @candidate_english_name);
+	--	SET @Orig_candidate_english_name = @candidate_english_name;
+	--END
 
 	IF(@Orig_candidate_unit <> @candidate_unit AND LEN(@candidate_unit) >0)
 	BEGIN

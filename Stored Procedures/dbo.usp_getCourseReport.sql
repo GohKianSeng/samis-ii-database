@@ -22,7 +22,8 @@ SET NOCOUNT ON;
 
 	SELECT A.NRIC, ISNULL(ISNULL(C.EnglishName, D.EnglishName), E.EnglishName) AS Name, 
                  ISNULL(ISNULL(C.Gender, D.Gender), E.Gender) AS Gender,
-				 ISNULL(ISNULL(F.ParishName, 'St Andrew''s Cathedral'), 'St Andrew''s Cathedral') AS Church,
+				 ISNULL(F.ParishName, '') AS Church,
+				 ISNULL(C.ChurchOthers, '') AS ChurchOthersName,
 				 ISNULL(ISNULL(I.CongregationName, J.CongregationName), '') AS Congregation,
 				 ISNULL(ISNULL(ISNULL(ISNULL(C.Contact, D.MobileTel), D.HomeTel), E.MobileTel), E.HomeTel) AS Contact,
 				 ISNULL(ISNULL(C.Email, D.Email), E.Email) AS Email, 
@@ -31,7 +32,7 @@ SET NOCOUNT ON;
 	LEFT OUTER JOIN [dbo].[tb_visitors] AS C ON C.NRIC = A.NRIC
 	LEFT OUTER JOIN [dbo].[tb_members] AS D ON D.NRIC = A.NRIC
 	LEFT OUTER JOIN [dbo].[tb_members_temp] AS E ON E.NRIC = A.NRIC
-	LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = C.Church
+	LEFT OUTER JOIN [dbo].[tb_parish] AS F ON F.ParishID = ISNULL(ISNULL(C.Church, D.CurrentParish), E.CurrentParish)
 	LEFT OUTER JOIN [dbo].[tb_membersOtherInfo] AS G ON G.NRIC = D.NRIC
 	LEFT OUTER JOIN [dbo].[tb_membersOtherInfo_temp] AS H ON H.NRIC = E.NRIC
 	LEFT OUTER JOIN [dbo].[tb_congregation] AS I ON I.CongregationID = G.Congregation
