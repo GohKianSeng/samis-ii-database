@@ -146,7 +146,7 @@ BEGIN
 	
 	IF(@Orig_candidate_congregation <> @candidate_congregation)
 	BEGIN
-		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Congregation', (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationID = @Orig_candidate_congregation), (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationName = @candidate_congregation));		
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Congregation', (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationID = @Orig_candidate_congregation), (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationID = @candidate_congregation));		
 	END
 	
 	IF(@Orig_candidate_salutation <> @candidate_salutation)
