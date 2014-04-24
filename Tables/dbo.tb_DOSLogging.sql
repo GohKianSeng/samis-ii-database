@@ -11,6 +11,6 @@ CREATE TABLE [dbo].[tb_DOSLogging]
 [ReferenceType] [nchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [UpdatedElements] [xml] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[tb_DOSLogging] ADD CONSTRAINT [PK_tb_AuditLog_LogID] PRIMARY KEY CLUSTERED  ([LogID]) ON [PRIMARY]
+ALTER TABLE [dbo].[tb_DOSLogging] ADD 
+CONSTRAINT [PK_tb_AuditLog_LogID] PRIMARY KEY CLUSTERED  ([LogID] DESC) ON [PRIMARY]
 GO

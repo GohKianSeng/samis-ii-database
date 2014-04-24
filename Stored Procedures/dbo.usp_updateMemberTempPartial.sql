@@ -25,12 +25,13 @@ DECLARE @UserID VARCHAR(50),
 @candidate_education VARCHAR(3),
 @candidate_mobile_tel VARCHAR(15),
 @candidate_mailingList VARCHAR(3),
+@candidate_congregation TINYINT,
 @candidate_mailingListBoolean BIT = 0;
 
 	DECLARE @idoc int;
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @updateXML;
 	
-    SELECT @candidate_mailingList = mailingList, @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
+    SELECT @candidate_congregation = Congregation, @candidate_mailingList = mailingList, @UserID = EnteredBy, @candidate_nric = NRIC, @candidate_salutation = Salutation,
 	@candidate_english_name = EnglishName, @candidate_gender = Gender, @candidate_dob = CONVERT(DATETIME, DOB, 103),
 	@candidate_nationality = Nationality,
 	@candidate_street_address = AddressStreetName, @candidate_blk_house = AddressBlkHouse,
@@ -53,6 +54,7 @@ DECLARE @UserID VARCHAR(50),
 	Email VARCHAR(100) './Email',
 	Education VARCHAR(3) './Education',
 	mailingList VARCHAR(3) './mailingList',
+	Congregation TINYINT './Congregation',
 	Occupation VARCHAR(3) './Occupation');
 
 IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
@@ -103,11 +105,14 @@ BEGIN
 	DECLARE @Orig_candidate_education VARCHAR(3)
 	DECLARE @Orig_candidate_mobile_tel VARCHAR(15)	
 	DECLARE @Orig_candidate_mailingList VARCHAR(3)
+	DECLARE @Orig_candidate_congregation VARCHAR(3)
 
 	DECLARE @ChangesTable TABLE (
 			ElementName VARCHAR(100),
 			[From] VARCHAR(MAX),
 			[To] VARCHAR(MAX));
+			
+	SELECT @Orig_candidate_congregation = Congregation FROM dbo.tb_membersOtherInfo_temp WHERE NRIC = @candidate_nric;
 	
 	SELECT  @Orig_candidate_mailingList = ReceiveMailingList, @Orig_candidate_salutation = Salutation, @Orig_candidate_english_name = EnglishName, @Orig_candidate_unit = AddressUnit,
 			@Orig_candidate_blk_house = AddressHouseBlk, @Orig_candidate_nationality = Nationality, @Orig_candidate_occupation = Occupation,
@@ -115,7 +120,12 @@ BEGIN
 			@Orig_candidate_postal_code = AddressPostalCode, @Orig_candidate_email = Email, @Orig_candidate_education = Education,
 			@Orig_candidate_mobile_tel = MobileTel
 	FROM dbo.tb_members_temp AS A
-	WHERE A.NRIC = @candidate_nric
+	WHERE A.NRIC = @candidate_nric;
+	
+	IF(@Orig_candidate_congregation <> @candidate_congregation)
+	BEGIN
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('Congregation(Indicated)', (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationID = @Orig_candidate_congregation), (SELECT CongregationName FROM dbo.tb_congregation WHERE CongregationID = @candidate_congregation));		
+	END
 
 	IF(@Orig_candidate_mailingList <> @candidate_mailingListBoolean)
 	BEGIN
@@ -130,7 +140,7 @@ BEGIN
 
 	IF(@Orig_candidate_english_name <> @candidate_english_name AND LEN(@candidate_english_name) >0)
 	BEGIN
-		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('English Name', @Orig_candidate_english_name, @candidate_english_name);
+		INSERT INTO @ChangesTable (ElementName, [From], [To]) VALUES ('English Name(Indicated)', @Orig_candidate_english_name, @candidate_english_name);
 		SET @Orig_candidate_english_name = @candidate_english_name;
 	END
 
@@ -213,10 +223,10 @@ BEGIN
 		DECLARE @changesXML AS XML = (
 		SELECT FromTo FROM @returnTable FOR XML RAW('Changes'), ELEMENTS);
 		
-		
+		--UPDATE tb_membersOtherInfo_temp SET Congregation = @candidate_congregation WHERE NRIC = @candidate_nric;
 		
 		UPDATE dbo.tb_members_temp SET   Salutation = @Orig_candidate_salutation,
-							EnglishName = @Orig_candidate_english_name,
+							--EnglishName = @Orig_candidate_english_name,
 							AddressUnit = @Orig_candidate_unit,
 							AddressHouseBlk = @Orig_candidate_blk_house,
 							Nationality = @Orig_candidate_nationality,

@@ -4,7 +4,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[usp_addNewCourseVisitorParticipantAndAttendance]
-(@mailingList VARCHAR(3), @nric VARCHAR(10),
+(@Congregation VARCHAR(3), @mailingList VARCHAR(3), @nric VARCHAR(10),
 @course VARCHAR(10),
 @salutation VARCHAR(10),
 @english_name VARCHAR(50),
@@ -50,8 +50,8 @@ BEGIN
 		SET @dob = NULL;
 	END
 
-	INSERT INTO dbo.tb_visitors(ReceiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
-	SELECT @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
+	INSERT INTO dbo.tb_visitors(Congregation, ReceiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
+	SELECT @Congregation, @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
 	
 	INSERT INTO dbo.tb_course_participant(NRIC, courseID)
 	SELECT @nric, @course;
@@ -65,11 +65,12 @@ BEGIN
 			A.NRIC,
 			A.DOB, dbo.udf_getGender(A.Gender) AS Gender, A.AddressStreet,
 			ISNULL(CONVERT(VARCHAR(7), A.AddressPostalCode), '') AS AddressPostalCode, A.Email, dbo.udf_getEducation(A.Education) AS Education,
-			A.Contact, A.Church, A.ChurchOthers
+			A.Contact, A.Church, A.ChurchOthers, ISNULL(G.CongregationName, '') AS CongregationName
 	FROM dbo.tb_visitors AS A
 	LEFT OUTER JOIN dbo.tb_Salutation AS C ON A.Salutation = C.SalutationID
 	LEFT OUTER JOIN dbo.tb_country AS D ON A.Nationality = D.CountryID
 	LEFT OUTER JOIN dbo.tb_occupation AS F ON A.Occupation = F.OccupationID	
+	LEFT OUTER JOIN dbo.tb_congregation AS G ON G.CongregationID = A.Congregation
 	WHERE A.NRIC = @nric
 	FOR XML PATH, ELEMENTS)
 	

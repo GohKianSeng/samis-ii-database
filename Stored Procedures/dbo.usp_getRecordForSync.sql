@@ -14,7 +14,7 @@ UPDATE dbo.tb_members_temp SET MarkSync = 1
 
 DECLARE @XML XML = (SELECT
 	CONVERT(XML, (SELECT CourseID, CONVERT(VARCHAR(22), RegistrationDate,103) AS RegistrationDate, 'Unspecified' AS EnteredBy, B.NRIC AS OriginalNRIC, B.NRIC AS NRIC, B.Salutation, EnglishName, Gender, CONVERT(VARCHAR(10), DOB, 103) AS DOB,
-		   Nationality, AddressStreet AS AddressStreetName, AddressPostalCode, AddressHouseBlk AS AddressBlkHouse,
+		   Congregation, Nationality, AddressStreet AS AddressStreetName, AddressPostalCode, AddressHouseBlk AS AddressBlkHouse,
 		   AddressUnit, Contact, Email, Education, Occupation, Church, ChurchOthers, AdditionalInformation, ReceiveMailingList AS mailingList
 	FROM dbo.tb_course_participant AS A
 	INNER JOIN dbo.tb_visitors AS B ON A.NRIC = B.NRIC WHERE MarkSync = 1

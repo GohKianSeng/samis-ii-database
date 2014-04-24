@@ -32,6 +32,7 @@ DECLARE @nric VARCHAR(20),
 @church INT,
 @church_others VARCHAR(100), @UserID VARCHAR(50),
 @candidate_mailingList VARCHAR(3),
+@candidate_congregation TINYINT,
 @candidate_mailingListBoolean BIT = 0;
 
 	DECLARE @idoc int;
@@ -43,7 +44,7 @@ DECLARE @nric VARCHAR(20),
 	@street_address = AddressStreetName, @blk_house = AddressBlkHouse,
 	@postal_code = AddressPostalCode, @unit = AddressUnit,
 	@email = Email, @education = Education, @occupation = Occupation,
-	@church = Church, @church_others = ChurchOthers
+	@church = Church, @church_others = ChurchOthers, @candidate_congregation = Congregation
 	FROM OPENXML(@idoc, '/Update')
 	WITH (
 	EnteredBy VARCHAR(50)'./EnteredBy',
@@ -64,7 +65,8 @@ DECLARE @nric VARCHAR(20),
 	Occupation VARCHAR(3) './Occupation',
 	mailingList VARCHAR(3) './mailingList',
 	Church VARCHAR(3) './Church',
-	ChurchOthers VARCHAR(3) './ChurchOthers');
+	ChurchOthers VARCHAR(3) './ChurchOthers',
+	Congregation TINYINT './Congregation');
 
 IF(@candidate_mailingList = 'ON' OR @candidate_mailingList = '1')
 BEGIN
@@ -115,8 +117,8 @@ BEGIN
 		SET @dob = NULL;
 	END
 	
-	INSERT INTO dbo.tb_visitors(receiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
-	SELECT @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
+	INSERT INTO dbo.tb_visitors(Congregation, receiveMailingList, Salutation, NRIC, EnglishName, DOB, Gender, Education, Occupation, Nationality, Email, Contact, AddressStreet, AddressHouseBlk, AddressPostalCode, AddressUnit, VisitorType, Church, ChurchOthers)
+	SELECT @candidate_congregation, @candidate_mailingListBoolean, @salutation, @nric, @english_name, @dob, @gender, @education, @occupation, @nationality, @email, @contact, @street_address, @blk_house, @postal_code, @unit, 1, @church, @church_others
 	
 	INSERT INTO dbo.tb_course_participant(NRIC, courseID, AdditionalInformation)
 	SELECT @nric, @course, ISNULL(@AdditionalInformation, '<div />');
@@ -127,11 +129,12 @@ BEGIN
 			A.NRIC,
 			A.DOB, dbo.udf_getGender(A.Gender) AS Gender, A.AddressStreet,
 			ISNULL(CONVERT(VARCHAR(7), A.AddressPostalCode), '') AS AddressPostalCode, A.Email, dbo.udf_getEducation(A.Education) AS Education,
-			A.Contact, A.Church, A.ChurchOthers
+			A.Contact, A.Church, A.ChurchOthers, ISNULL(G.CongregationName, '') AS CongregationName
 	FROM dbo.tb_visitors AS A
 	LEFT OUTER JOIN dbo.tb_Salutation AS C ON A.Salutation = C.SalutationID
 	LEFT OUTER JOIN dbo.tb_country AS D ON A.Nationality = D.CountryID
 	LEFT OUTER JOIN dbo.tb_occupation AS F ON A.Occupation = F.OccupationID	
+	LEFT OUTER JOIN dbo.tb_congregation AS G on G.CongregationID = A.Congregation
 	WHERE A.NRIC = @nric
 	FOR XML PATH, ELEMENTS)
 	

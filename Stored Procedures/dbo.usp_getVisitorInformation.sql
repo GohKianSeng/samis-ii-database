@@ -10,7 +10,7 @@ AS
 SET NOCOUNT ON;
 
 
-	SELECT ReceiveMailingList AS mailingList, [EnglishName], CONVERT(VARCHAR(5), [Salutation]) AS Salutation
+	SELECT ISNULL(CONVERT(VARCHAR(2), Congregation), '') AS Congregation, ReceiveMailingList AS mailingList, [EnglishName], CONVERT(VARCHAR(5), [Salutation]) AS Salutation
       ,ISNULL(CONVERT(VARCHAR(10),[DOB],103), '') AS DOB ,[Gender] ,@NRIC AS [NRIC] , CONVERT(VARCHAR(5),[Nationality]) AS [Nationality]
       ,[AddressStreet] ,[AddressHouseBlk] , ISNULL(CONVERT(VARCHAR(6),[AddressPostalCode]),'' ) AS [AddressPostalCode] ,[AddressUnit] ,[Email]
       ,CONVERT(VARCHAR(5), [Education]) AS Education , CONVERT(VARCHAR(5),[Occupation]) AS [Occupation], Contact 
